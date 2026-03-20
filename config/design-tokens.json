@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "version": "2.0.0",
+    "brand": "RevFactor",
+    "brandGuide": "Caro Petersen Design Studio, 2025"
+  },
+  "color": {
+    "brand": {
+      "bone":    { "value": "#DDDAD3", "rgb": "221, 218, 211", "cmyk": "11, 9, 11, 0",   "usage": "Backgrounds, content blocks, subtle accents" },
+      "moss":    { "value": "#5D6D59", "rgb": "92, 109, 90",   "cmyk": "66, 43, 64, 13",  "usage": "Accent elements, secondary buttons, section labels" },
+      "cedar":   { "value": "#13342D", "rgb": "20, 53, 45",    "cmyk": "86, 42, 66, 60",  "usage": "Primary actions, links, active states, focus rings" },
+      "walnut":  { "value": "#76574C", "rgb": "117, 87, 76",   "cmyk": "50, 64, 67, 15",  "usage": "Body text, descriptions, captions" },
+      "tobacco": { "value": "#3F261F", "rgb": "63, 38, 31",    "cmyk": "48, 75, 75, 57",  "usage": "Headings, navigation, high-emphasis elements" },
+      "onyx":    { "value": "#161910", "rgb": "22, 25, 16",    "cmyk": "72, 62, 72, 74",  "usage": "Primary text, icons, critical elements" }
+    },
+    "extended": {
+      "boneLight":  { "value": "#E8E6E1" },
+      "boneDark":   { "value": "#CCC8BF" },
+      "mossLight":  { "value": "#7A8B76" },
+      "cedarLight": { "value": "#1E4A40" },
+      "walnutLight": { "value": "#8F6E62" }
+    },
+    "surface": {
+      "paper":    { "value": "#FCF9F2", "usage": "Primary canvas" },
+      "stone":    { "value": "#E9E5D8", "usage": "Foundation, base layer" },
+      "level0":   { "value": "#dedacd", "usage": "Base layer anchor" },
+      "level1":   { "value": "#fef9ec", "usage": "Section backgrounds" },
+      "level2":   { "value": "#f8f3e6", "usage": "Interactive surfaces, inputs" },
+      "level3":   { "value": "#e6e2d5", "usage": "Highlights, hover states" },
+      "white":    { "value": "#ffffff", "usage": "Elevated cards, lowest container" },
+      "outlineVariant": { "value": "#c1c8c5", "usage": "Ghost borders at 15% opacity" }
+    },
+    "semantic": {
+      "success":   { "value": "#4A7C59" }, "successBg": { "value": "#E2EDDF" },
+      "warning":   { "value": "#9A7B4F" }, "warningBg": { "value": "#F0E8D8" },
+      "error":     { "value": "#8B3A3A" }, "errorBg":   { "value": "#F0DADA" },
+      "info":      { "value": "#5D6D59" }, "infoBg":    { "value": "#E2E8E1" }
+    },
+    "dark": {
+      "background":    { "value": "#161910" },
+      "surface":       { "value": "#1E2A1C" },
+      "border":        { "value": "#2A3828" },
+      "textPrimary":   { "value": "#DDDAD3" },
+      "textSecondary": { "value": "#CCC8BF" },
+      "accent":        { "value": "#7A8B76" }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "display": "'Newsreader', Georgia, 'Times New Roman', serif",
+      "body":    "'Inter', Helvetica, 'Helvetica Neue', Arial, sans-serif",
+      "mono":    "'JetBrains Mono', 'SF Mono', 'Courier New', monospace"
+    },
+    "styles": {
+      "display":   { "font": "display", "weight": "400", "size": "48px", "lineHeight": "1.15", "case": "lowercase" },
+      "header":    { "font": "display", "weight": "400", "size": "38px", "lineHeight": "1.2",  "case": "lowercase" },
+      "subheader": { "font": "display", "weight": "400", "size": "24px", "lineHeight": "1.3",  "case": "lowercase", "style": "italic" },
+      "accent":    { "font": "body",    "weight": "700", "size": "14px", "lineHeight": "1.4",  "case": "uppercase", "letterSpacing": "1.5px" },
+      "button":    { "font": "body",    "weight": "700", "size": "11px", "lineHeight": "1",    "case": "uppercase", "letterSpacing": "1.5px" },
+      "body":      { "font": "body",    "weight": "400", "size": "15px", "lineHeight": "1.7",  "case": "standard" },
+      "caption":   { "font": "body",    "weight": "400", "size": "12px", "lineHeight": "1.5",  "case": "standard" },
+      "label":     { "font": "body",    "weight": "700", "size": "10px", "lineHeight": "1.4",  "case": "uppercase", "letterSpacing": "1.5px" },
+      "mono":      { "font": "mono",    "weight": "500", "size": "12px", "lineHeight": "1.6",  "case": "standard" }
+    }
+  },
+  "spacing": {
+    "4": "4px", "8": "8px", "12": "12px", "16": "16px", "24": "24px",
+    "32": "32px", "48": "48px", "64": "64px", "96": "96px", "128": "128px"
+  },
+  "borderRadius": {
+    "sm": "4px", "md": "8px", "lg": "12px", "xl": "20px", "full": "9999px"
+  },
+  "shadow": {
+    "sm": "0 1px 3px rgba(22, 25, 16, 0.06)",
+    "md": "0 4px 12px rgba(22, 25, 16, 0.08)",
+    "lg": "0 12px 32px rgba(22, 25, 16, 0.10)",
+    "xl": "0 24px 48px rgba(22, 25, 16, 0.14)"
+  },
+  "motion": {
+    "easing": "cubic-bezier(0.25, 0.1, 0.25, 1)",
+    "fast": "120ms",
+    "normal": "200ms",
+    "slow": "350ms"
+  },
+  "breakpoint": {
+    "mobileS": "320px", "mobile": "375px", "mobileL": "428px",
+    "tablet": "768px", "desktop": "1024px", "desktopXL": "1440px"
+  },
+  "grid": {
+    "desktopXL": { "columns": 12, "gutter": "24px", "margin": "80px" },
+    "desktop":   { "columns": 12, "gutter": "24px", "margin": "48px" },
+    "tablet":    { "columns": 8,  "gutter": "20px", "margin": "32px" },
+    "mobileL":   { "columns": 4,  "gutter": "16px", "margin": "24px" },
+    "mobile":    { "columns": 4,  "gutter": "16px", "margin": "20px" },
+    "mobileS":   { "columns": 4,  "gutter": "12px", "margin": "16px" }
+  }
+}

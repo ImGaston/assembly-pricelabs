@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.pricelabs.co)",
+      "WebFetch(domain:pricelabs.co)",
+      "Bash(npm install:*)",
+      "Bash(curl -s -o /tmp/test1.html -w \"HTTP %{http_code}, %{size_download} bytes\" \"http://localhost:3001/api/dashboard/grant-currant?token=CHANGE_ME_1782f902e706453cb6ac6c3ad111d49c\")",
+      "Bash(curl -s -o /tmp/test2.html -w \"HTTP %{http_code}, %{size_download} bytes\" \"http://localhost:3001/api/dashboard/grant-currant?token=WRONG\")",
+      "Bash(curl -s -o /tmp/test3.html -w \"HTTP %{http_code}, %{size_download} bytes\" \"http://localhost:3001/api/dashboard/nonexistent?token=anything\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}, %{size_download} bytes\" \"http://localhost:3001/api/dashboard/alicia-amarant?token=CHANGE_ME_bbe7afe889fd9d9995efedec1769235a\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}, %{size_download} bytes\" \"http://localhost:3001/api/dashboard/elizabeth-carlson?token=CHANGE_ME_a764e42f93462e48cebc0ad50ecf364f\")",
+      "Bash(curl -s -I \"http://localhost:3001/api/dashboard/grant-currant?token=CHANGE_ME_1782f902e706453cb6ac6c3ad111d49c\")",
+      "Read(//private/tmp/**)",
+      "Bash(kill 76913)",
+      "Bash(curl -s -H \"X-API-Key: patNJTxXfiSAmboOG.153930c1029bce5064bbc49980e62578ff6f4ad8046f7c6f022368c153e5bce2\" \"https://api.pricelabs.co/v1/listings\")",
+      "Bash(curl -s -H \"Authorization: Bearer patNJTxXfiSAmboOG.153930c1029bce5064bbc49980e62578ff6f4ad8046f7c6f022368c153e5bce2\" \"https://api.pricelabs.co/v1/listings\")",
+      "Bash(curl -s -H \"Authorization: patNJTxXfiSAmboOG.153930c1029bce5064bbc49980e62578ff6f4ad8046f7c6f022368c153e5bce2\" \"https://api.pricelabs.co/v1/listings\")",
+      "Bash(curl -s \"https://api.pricelabs.co/v1/listings?api_key=B9gan1YWQRMfkeeWGoH084yu4fIfdMkx2T2ladem\")",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); listings=data[''''listings'''']; print\\(f''''Total listings: {len\\(listings\\)}''''\\); [print\\(f''''  {l[\"\"id\"\"]} | {l[\"\"name\"\"][:50]} | {l[\"\"city_name\"\"]} | occ30={l.get\\(\"\"adjusted_occupancy_next_30\"\",\"\"?\"\"\\)} | mkt={l.get\\(\"\"market_adjusted_occupancy_next_30\"\",\"\"?\"\"\\)} | mpi={l.get\\(\"\"mpi_next_30\"\",\"\"?\"\"\\)}''''\\) for l in listings[:5]]; print\\(''''...''''\\)\")",
+      "Bash(curl -s \"https://api.pricelabs.co/v1/reservations?api_key=B9gan1YWQRMfkeeWGoH084yu4fIfdMkx2T2ladem&listing_id=79859\")",
+      "Bash(curl -s \"https://api.pricelabs.co/v1/listings/79859/overrides?api_key=B9gan1YWQRMfkeeWGoH084yu4fIfdMkx2T2ladem\")",
+      "Bash(curl -s \"https://api.pricelabs.co/v1/listings/79859/calendar?api_key=B9gan1YWQRMfkeeWGoH084yu4fIfdMkx2T2ladem\")",
+      "Bash(curl -s \"https://api.pricelabs.co/v1/listings/79859/reservations?api_key=B9gan1YWQRMfkeeWGoH084yu4fIfdMkx2T2ladem\")",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(json.dumps\\(list\\(data[''''listings''''][0].keys\\(\\)\\), indent=2\\)\\)\")",
+      "Bash(curl -s -w \"\\\\nHTTP_CODE:%{http_code}\\\\nCONTENT_TYPE:%{content_type}\" \"http://localhost:3000/api/dashboard/grant-currant?token=CHANGE_ME_1782f902e706453cb6ac6c3ad111d49c\")",
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill:*)",
+      "Bash(curl -s \"http://localhost:3000/api/dashboard/grant-currant?token=CHANGE_ME_1782f902e706453cb6ac6c3ad111d49c\")"
+    ]
+  }
+}
