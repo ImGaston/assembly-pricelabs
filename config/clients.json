@@ -1,5 +1,23 @@
 {
   "clients": {
+    "demo": {
+      "name": "Sample Portfolio",
+      "token": "demo_revfactor_2024_showcase",
+      "market": "Gatlinburg / Smoky Mountains, TN",
+      "pms": "Demo",
+      "useMockData": true,
+      "demoListings": [
+        { "listingId": "demo-001", "name": "Smoky Summit Lodge", "city": "Gatlinburg, TN" },
+        { "listingId": "demo-002", "name": "Mountain Mist Cabin", "city": "Gatlinburg, TN" },
+        { "listingId": "demo-003", "name": "Cedar Creek Retreat", "city": "Pigeon Forge, TN" },
+        { "listingId": "demo-004", "name": "Bearfoot Chalet", "city": "Sevierville, TN" },
+        { "listingId": "demo-005", "name": "Wildwood Escape", "city": "Gatlinburg, TN" },
+        { "listingId": "demo-006", "name": "Timber Ridge Villa", "city": "Pigeon Forge, TN" },
+        { "listingId": "demo-007", "name": "Sunrise View Cottage", "city": "Gatlinburg, TN" },
+        { "listingId": "demo-008", "name": "Elk Meadow Cabin", "city": "Sevierville, TN" }
+      ],
+      "nameOverrides": {}
+    },
     "grant-currant": {
       "name": "Grant Currant",
       "token": "CHANGE_ME_1782f902e706453cb6ac6c3ad111d49c",

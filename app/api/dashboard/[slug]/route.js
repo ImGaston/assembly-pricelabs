@@ -1,5 +1,6 @@
 import { validateClient } from '../../../../lib/auth.js';
 import { fetchClientData, fetchClientDataByGroup } from '../../../../lib/pricelabs.js';
+import { generateMockData } from '../../../../lib/mock-data.js';
 import { renderDashboard, renderErrorPage } from '../../../../lib/render.js';
 
 /**
@@ -30,7 +31,10 @@ export async function GET(request, { params }) {
   // Fetch data and render
   try {
     let data;
-    if (auth.client.priceLabsGroup) {
+    if (auth.client.useMockData && auth.client.demoListings) {
+      // Demo/template client — use mock data
+      data = generateMockData(auth.client.demoListings);
+    } else if (auth.client.priceLabsGroup) {
       data = await fetchClientDataByGroup(
         auth.client.priceLabsGroup,
         auth.client.nameOverrides || {}
