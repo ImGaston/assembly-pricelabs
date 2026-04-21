@@ -50,12 +50,15 @@ export async function GET(request, { params }) {
       );
     }
     const html = renderDashboard(auth.client, data);
+    const isEmpty = !data.listings || data.listings.length === 0;
 
     return new Response(html, {
       status: 200,
       headers: {
         ...responseHeaders(),
-        'Cache-Control': 's-maxage=21600, stale-while-revalidate=3600',
+        'Cache-Control': isEmpty
+          ? 'no-store'
+          : 's-maxage=21600, stale-while-revalidate=3600',
       },
     });
   } catch (err) {
