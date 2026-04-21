@@ -1,5 +1,5 @@
 import { validateClient } from '../../../../lib/auth.js';
-import { fetchClientData, fetchClientDataByGroup } from '../../../../lib/pricelabs.js';
+import { fetchClientDataByGroup } from '../../../../lib/pricelabs.js';
 import { generateMockData } from '../../../../lib/mock-data.js';
 import { renderDashboard, renderErrorPage } from '../../../../lib/render.js';
 
@@ -11,8 +11,7 @@ export async function GET(request, { params }) {
   const { slug } = await params;
   const token = new URL(request.url).searchParams.get('token');
 
-  // Validate client
-  const auth = validateClient(slug, token);
+  const auth = await validateClient(slug, token);
 
   if (auth.error === 'not_found') {
     return new Response(renderErrorPage(404, 'portfolio not found'), {
@@ -28,22 +27,25 @@ export async function GET(request, { params }) {
     });
   }
 
-  // Fetch data and render
+  if (auth.error === 'lookup_failed') {
+    return new Response(renderErrorPage(503, 'temporarily unavailable'), {
+      status: 503,
+      headers: responseHeaders(),
+    });
+  }
+
   try {
     let data;
     if (auth.client.useMockData && auth.client.demoListings) {
-      // Demo/template client — use mock data
       data = generateMockData(auth.client.demoListings);
     } else if (auth.client.priceLabsGroup) {
       data = await fetchClientDataByGroup(
         auth.client.priceLabsGroup,
         auth.client.nameOverrides || {}
       );
-    } else if (auth.client.listings) {
-      data = await fetchClientData(auth.client.listings);
     } else {
       return new Response(
-        renderErrorPage(500, 'no listings configured'),
+        renderErrorPage(500, 'no pricelabs group configured'),
         { status: 500, headers: responseHeaders() }
       );
     }
