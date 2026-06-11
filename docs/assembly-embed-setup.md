@@ -15,19 +15,20 @@
 
 ### Per-client setup
 
-For each beta tester client:
+Before creating the embed, confirm that the client exists in Supabase and that
+its rows in `listings` have the correct `client_id`. The dashboard uses those
+`listing_id` values to select the client's PriceLabs data automatically.
+
+`clients.pricelabs_group` is a compatibility fallback for older clients without
+listing associations or whose legacy IDs no longer match PriceLabs.
+
+For each client:
 
 1. Go to the Pricing Dashboard app page
 2. Click **Add** to add a new embed
 3. Select the **client** (or company) to share with
 4. Set display to **Show as embed**
-5. Paste the client's unique URL into the content box:
-
-| Client | URL |
-|--------|-----|
-| Grant Currant | `https://portal.revfactor.co/api/dashboard/grant-currant?token=TOKEN_HERE` |
-| Alicia Amarant | `https://portal.revfactor.co/api/dashboard/alicia-amarant?token=TOKEN_HERE` |
-| Elizabeth Carlson | `https://portal.revfactor.co/api/dashboard/elizabeth-carlson?token=TOKEN_HERE` |
+5. Copy `clients.dashboard_url` from Supabase and paste it into the content box.
 
 6. Click **Save**
 7. Repeat for each client
@@ -41,7 +42,8 @@ For each beta tester client:
 ### Troubleshooting
 
 **Dashboard doesn't load?**
-- Check that the URL is correct (slug + token match config)
+- Check that the URL contains the client's UUID and current `dashboard_token`
+- Verify that the client's `listings` rows contain PriceLabs-compatible `listing_id` values
 - Verify the Vercel deployment is live
 - Check browser console for iframe errors
 
@@ -54,7 +56,6 @@ For each beta tester client:
 
 **Data looks stale?**
 - Cache refreshes every 6 hours
-- Force refresh by appending `&nocache=1` to the URL (if implemented)
 
 ## Future: Custom App SDK (Phase 2)
 

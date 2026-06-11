@@ -1,5 +1,5 @@
 import { validateClient } from '../../../../lib/auth.js';
-import { fetchClientDataByGroup } from '../../../../lib/pricelabs.js';
+import { fetchClientData } from '../../../../lib/pricelabs.js';
 import { generateMockData } from '../../../../lib/mock-data.js';
 import { renderDashboard, renderErrorPage } from '../../../../lib/render.js';
 
@@ -38,14 +38,15 @@ export async function GET(request, { params }) {
     let data;
     if (auth.client.useMockData && auth.client.demoListings) {
       data = generateMockData(auth.client.demoListings);
-    } else if (auth.client.priceLabsGroup) {
-      data = await fetchClientDataByGroup(
-        auth.client.priceLabsGroup,
-        auth.client.nameOverrides || {}
-      );
+    } else if (auth.client.listingIds?.length || auth.client.priceLabsGroup) {
+      data = await fetchClientData({
+        listingIds: auth.client.listingIds,
+        groupName: auth.client.priceLabsGroup,
+        nameOverrides: auth.client.nameOverrides,
+      });
     } else {
       return new Response(
-        renderErrorPage(500, 'no pricelabs group configured'),
+        renderErrorPage(500, 'no listings configured'),
         { status: 500, headers: responseHeaders() }
       );
     }
