@@ -1,6 +1,7 @@
 import { validateClient } from '../../../../lib/auth.js';
 import { fetchClientData } from '../../../../lib/pricelabs.js';
-import { generateMockData } from '../../../../lib/mock-data.js';
+import { getClientReport } from '../../../../lib/reports.js';
+import { generateMockReportData } from '../../../../lib/mock-data.js';
 import { renderDashboard, renderErrorPage } from '../../../../lib/render.js';
 
 /**
@@ -37,18 +38,27 @@ export async function GET(request, { params }) {
   try {
     let data;
     if (auth.client.useMockData && auth.client.demoListings) {
-      data = generateMockData(auth.client.demoListings);
-    } else if (auth.client.listingIds?.length || auth.client.priceLabsGroup) {
-      data = await fetchClientData({
-        listingIds: auth.client.listingIds,
-        groupName: auth.client.priceLabsGroup,
-        nameOverrides: auth.client.nameOverrides,
-      });
+      data = generateMockReportData(auth.client.demoListings);
     } else {
-      return new Response(
-        renderErrorPage(500, 'no listings configured'),
-        { status: 500, headers: responseHeaders() }
-      );
+      // Primary source: the Hub's daily PriceLabs report (Supabase).
+      data = await getClientReport(auth.client);
+
+      // Fallback: clients not yet covered by a report run still render off the
+      // live PriceLabs API.
+      if (!data && (auth.client.listingIds?.length || auth.client.priceLabsGroup)) {
+        data = await fetchClientData({
+          listingIds: auth.client.listingIds,
+          groupName: auth.client.priceLabsGroup,
+          nameOverrides: auth.client.nameOverrides,
+        });
+      }
+
+      if (!data) {
+        return new Response(
+          renderErrorPage(500, 'no listings configured'),
+          { status: 500, headers: responseHeaders() }
+        );
+      }
     }
     const html = renderDashboard(auth.client, data);
     const isEmpty = !data.listings || data.listings.length === 0;
