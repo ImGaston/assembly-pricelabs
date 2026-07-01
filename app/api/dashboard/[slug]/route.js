@@ -1,7 +1,8 @@
 import { validateClient } from '../../../../lib/auth.js';
 import { fetchClientData } from '../../../../lib/pricelabs.js';
 import { getClientReport } from '../../../../lib/reports.js';
-import { generateMockReportData } from '../../../../lib/mock-data.js';
+import { getClientSeo } from '../../../../lib/seo.js';
+import { generateMockReportData, generateMockSeoData } from '../../../../lib/mock-data.js';
 import { renderDashboard, renderErrorPage } from '../../../../lib/render.js';
 
 /**
@@ -10,7 +11,9 @@ import { renderDashboard, renderErrorPage } from '../../../../lib/render.js';
  */
 export async function GET(request, { params }) {
   const { slug } = await params;
-  const token = new URL(request.url).searchParams.get('token');
+  const url = new URL(request.url);
+  const token = url.searchParams.get('token');
+  const tab = url.searchParams.get('tab') === 'seo' ? 'seo' : 'pricing';
 
   const auth = await validateClient(slug, token);
 
@@ -36,6 +39,28 @@ export async function GET(request, { params }) {
   }
 
   try {
+    // SEO Visibility tab — a parallel view keyed off the same client/auth. A null
+    // result (no SEO coverage) still renders 200 as an empty state.
+    if (tab === 'seo') {
+      const seo =
+        auth.client.useMockData && auth.client.demoListings
+          ? generateMockSeoData(auth.client.demoListings)
+          : await getClientSeo(auth.client);
+
+      const html = renderDashboard(auth.client, null, { tab: 'seo', seo });
+      const isEmpty = !seo || !seo.listings || seo.listings.length === 0;
+
+      return new Response(html, {
+        status: 200,
+        headers: {
+          ...responseHeaders(),
+          'Cache-Control': isEmpty
+            ? 'no-store'
+            : 's-maxage=21600, stale-while-revalidate=3600',
+        },
+      });
+    }
+
     let data;
     if (auth.client.useMockData && auth.client.demoListings) {
       data = generateMockReportData(auth.client.demoListings);
@@ -60,7 +85,7 @@ export async function GET(request, { params }) {
         );
       }
     }
-    const html = renderDashboard(auth.client, data);
+    const html = renderDashboard(auth.client, data, { tab: 'pricing', seo: null });
     const isEmpty = !data.listings || data.listings.length === 0;
 
     return new Response(html, {

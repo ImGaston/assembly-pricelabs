@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Visibility — DRAFT | RevFactor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root{
+    --cedar:#13342D; --walnut:#76574C; --tobacco:#3F261F; --onyx:#161910; --moss:#5D6D59;
+    --paper:#FCF9F2; --stone:#E9E5D8; --level1:#fef9ec; --level2:#f8f3e6; --level3:#e6e2d5;
+    --success:#4A7C59; --successBg:#E2EDDF; --warning:#9A7B4F; --warningBg:#F0E8D8; --error:#8B3A3A; --errorBg:#F0DADA;
+    --body:'Inter',Helvetica,Arial,sans-serif; --display:'Newsreader',Georgia,serif; --mono:'JetBrains Mono','SF Mono',monospace;
+  }
+  html { -webkit-text-size-adjust: 100%; }
+  body { background: var(--stone); font-family: var(--body); color: var(--onyx); font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased; }
+  .container { max-width:1200px; margin:0 auto; padding:48px 32px; }
+  .paper { background: var(--paper); padding:48px 40px; box-shadow:0 20px 40px rgba(29,28,20,0.05); }
+
+  /* DRAFT banner (mockup only) */
+  .draft-banner{ background:var(--warningBg); color:var(--warning); font-family:var(--body); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; padding:8px 16px; border-radius:2px; margin-bottom:24px; text-align:center; }
+
+  /* Header */
+  .header { margin-bottom: 40px; }
+  .eyebrow{ font-family:var(--body); font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--moss); margin-bottom:10px; }
+  .header h1 { font-family:var(--display); font-weight:400; font-size:40px; line-height:1.15; text-transform:lowercase; color:var(--tobacco); margin-bottom:4px; }
+  .header .tagline { font-family:var(--display); font-weight:400; font-style:italic; font-size:22px; line-height:1.3; text-transform:lowercase; color:var(--walnut); margin-bottom:16px; }
+  .header .updated { font-family:var(--body); font-size:12px; font-weight:500; color:var(--walnut); letter-spacing:0.3px; }
+
+  .section-title { font-family:var(--body); font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--moss); margin-bottom:16px; }
+  .section { margin-bottom: 48px; }
+
+  /* ---- Booking funnel ---- */
+  .funnel-card{ background:var(--level2); padding:28px 24px 20px; }
+  .funnel-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+  .funnel-head .ttl{ font-family:var(--display); font-style:italic; font-size:20px; text-transform:lowercase; color:var(--tobacco); }
+  .legend { display:flex; gap:16px; flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-family:var(--body); font-size:11px; font-weight:600; color:var(--walnut); }
+  .legend-swatch { width:12px; height:12px; border-radius:2px; display:inline-block; }
+
+  .stage{ padding:14px 0; }
+  .stage + .stage{ box-shadow: inset 0 1px 0 var(--level3); }
+  .stage-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+  .stage-name{ font-family:var(--body); font-weight:600; font-size:13px; color:var(--tobacco); }
+  .stage-win{ font-family:var(--body); font-weight:700; font-size:9px; text-transform:uppercase; letter-spacing:1px; padding:2px 7px; border-radius:2px; }
+  .win-you{ color:var(--success); background:var(--successBg); }
+  .win-them{ color:var(--warning); background:var(--warningBg); }
+  .bar-row{ display:grid; grid-template-columns:54px 1fr 92px; align-items:center; gap:10px; margin:5px 0; }
+  .bar-tag{ font-family:var(--body); font-weight:700; font-size:9px; text-transform:uppercase; letter-spacing:0.8px; color:var(--moss); }
+  .bar-track{ background:var(--level3); height:16px; border-radius:2px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:2px; }
+  .bar-you{ background:var(--cedar); }
+  .bar-them{ background:var(--walnut); opacity:.55; }
+  .bar-val{ font-family:var(--mono); font-size:12px; font-weight:500; color:var(--onyx); text-align:right; }
+
+  /* ---- Metrics board (KPI cards) ---- */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .kpi-card{ background:var(--level2); padding:22px 20px; }
+  .kpi-card .head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+  .kpi-label{ font-family:var(--body); font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:var(--moss); }
+  .kpi-ico{ width:26px; height:26px; border-radius:8px; background:var(--level3); display:flex; align-items:center; justify-content:center; font-size:13px; }
+  .kpi-rows{ display:flex; flex-direction:column; gap:7px; }
+  .kpi-r{ display:flex; align-items:center; justify-content:space-between; }
+  .kpi-mo{ font-family:var(--body); font-size:11px; font-weight:600; color:var(--walnut); text-transform:uppercase; letter-spacing:.5px; }
+  .kpi-mo .now{ font-size:8px; font-weight:700; color:var(--cedar); background:var(--successBg); border-radius:2px; padding:1px 5px; margin-left:6px; letter-spacing:1px; }
+  .kpi-v{ font-family:var(--mono); font-size:14px; font-weight:500; color:var(--onyx); display:flex; align-items:center; gap:6px; }
+  .arrow-up{ color:var(--success); } .arrow-dn{ color:var(--error); }
+  .kpi-note{ font-family:var(--body); font-size:9px; color:var(--walnut); margin-top:10px; font-style:italic; }
+
+  /* ---- Trend chart ---- */
+  .chart-card{ background:var(--level2); padding:28px 24px 20px; }
+  .chart-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .chart-svg{ width:100%; height:auto; display:block; }
+
+  /* ---- Ranking snapshot ---- */
+  .rank-card{ background:var(--level2); padding:28px 24px; }
+  .rank-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:16px; margin-top:8px; }
+  .rank-pod{ background:var(--paper); padding:18px 16px; text-align:center; }
+  .rank-pod .g{ font-family:var(--body); font-weight:700; font-size:9px; text-transform:uppercase; letter-spacing:1px; color:var(--moss); margin-bottom:6px; }
+  .rank-pod .p{ font-family:var(--mono); font-size:30px; font-weight:500; color:var(--cedar); line-height:1; }
+  .rank-pod .s{ font-family:var(--body); font-size:10px; color:var(--walnut); margin-top:4px; }
+
+  .footer{ text-align:center; padding:48px 24px 0; margin-top:8px; }
+  .footer-label{ font-family:var(--body); font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--moss); margin-top:12px; }
+  .footer-tag{ font-family:var(--display); font-style:italic; font-size:16px; color:var(--walnut); margin-top:4px; text-transform:lowercase; }
+
+  /* ---- Funnel guide (3 layers) ---- */
+  .guide-box{ background:var(--level1); margin-top:18px; }
+  .guide-box summary{ cursor:pointer; font-family:var(--body); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:var(--moss); padding:15px 18px; list-style:none; display:flex; align-items:center; gap:8px; }
+  .guide-box summary::-webkit-details-marker{ display:none; }
+  .guide-box summary::after{ content:'▾'; margin-left:auto; transition:transform .2s; }
+  .guide-box[open] summary::after{ transform:rotate(180deg); }
+  .guide-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:2px 18px 20px; }
+  .layer{ background:var(--paper); padding:16px 16px; border-top:3px solid var(--moss); }
+  .layer .ln{ font-family:var(--mono); font-size:10px; font-weight:600; color:var(--moss); letter-spacing:1px; text-transform:uppercase; }
+  .layer h4{ font-family:var(--display); font-style:italic; font-size:18px; text-transform:lowercase; color:var(--tobacco); margin:3px 0 9px; font-weight:400; }
+  .layer .chips{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:9px; }
+  .layer .chip{ font-family:var(--body); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; background:var(--level2); color:var(--walnut); padding:3px 7px; border-radius:3px; }
+  .layer p{ font-size:11.5px; color:var(--walnut); line-height:1.5; }
+  .layer .fix{ font-size:10.5px; color:var(--walnut); margin-top:9px; padding-top:9px; box-shadow:inset 0 1px 0 var(--level3); }
+  .layer .fix b{ color:var(--tobacco); font-weight:600; }
+
+  @media (max-width:900px){ .kpi-grid{ grid-template-columns:repeat(2,1fr);} .paper{padding:32px 24px;} .header h1{font-size:28px;} .guide-grid{ grid-template-columns:1fr; } }
+  @media (max-width:520px){ .kpi-grid{ grid-template-columns:1fr;} .bar-row{ grid-template-columns:48px 1fr 78px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="paper">
+
+    <div class="draft-banner">Borrador · datos reales de Rankbreeze (25 Jun 2026) · solo para revisión interna</div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <p class="eyebrow">SEO Visibility · Airbnb Search</p>
+      <h1>less than ½ mile to lake · luxe design · hot tub</h1>
+      <p class="tagline">visibility &amp; conversion vs. your market</p>
+      <p class="updated">Carnelian Bay, California &nbsp;·&nbsp; snapshot Jun 25, 2026 &nbsp;·&nbsp; source: Rankbreeze</p>
+    </div>
+
+    <!-- BOOKING FUNNEL -->
+    <div class="section">
+      <p class="section-title">1 · Booking Funnel — current month (June)</p>
+      <div class="funnel-card">
+        <div class="funnel-head">
+          <span class="ttl">how guests find &amp; book you</span>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--cedar);"></span>Your property</span>
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--walnut);"></span>Similar listings</span>
+          </div>
+        </div>
+
+        <!-- True funnel — server-renderable inline SVG, no client JS. Left/right labels live in the same SVG so rows always align. -->
+        <svg class="chart-svg" viewBox="0 0 760 478" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Booking funnel: your property vs similar listings">
+          <defs>
+            <style>
+              .fn-name{ font-family:'Inter',sans-serif; font-size:12px; font-weight:600; fill:#76574C; cursor:pointer; }
+              .fn-name tspan{ cursor:pointer; }
+              .fn-val { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:500; }
+              .fn-in  { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:500; fill:#FCF9F2; }
+            </style>
+          </defs>
+
+          <!-- ===== Row 0 · Average city ranking (full width) ===== -->
+          <polygon points="230,8 530,8 520,74 240,74" fill="#13342D"></polygon>
+          <text x="380" y="34" text-anchor="middle" class="fn-in" font-size="11" fill="#DDDAD3" style="letter-spacing:1px;text-transform:uppercase;">CITY SEARCH RANK</text>
+          <text x="380" y="56" text-anchor="middle" class="fn-in" font-size="17">★ #5 · Page 1</text>
+          <text x="14" y="36" class="fn-name">Average city rankings <tspan fill="#5D6D59" font-size="11">ⓘ</tspan><title>Positioning &amp; Views — Your average position in city search results. A higher placement reflects how relevant and reliable Airbnb considers your listing.</title></text>
+          <text x="14" y="57" class="fn-val" fill="#13342D">#5 of pool · Page 1</text>
+          <text x="746" y="36" text-anchor="end" class="fn-name">vs. market</text>
+          <text x="746" y="57" text-anchor="end" class="fn-val" fill="#5D6D59">~#18 avg</text>
+
+          <!-- ===== Row 1 · First-page impressions ===== -->
+          <polygon points="240,74 378,74 378,140 250,140" fill="#13342D"></polygon>
+          <polygon points="382,74 520,74 510,140 382,140" fill="#76574C"></polygon>
+          <text x="306" y="112" text-anchor="middle" class="fn-in">130,334 <tspan fill="#E0B84C">★</tspan></text>
+          <text x="450" y="112" text-anchor="middle" class="fn-in">2,095</text>
+          <text x="14" y="102" class="fn-name">First-page impressions <tspan fill="#5D6D59" font-size="11">ⓘ</tspan><title>Positioning &amp; Views — How often your listing appeared on the first page of search results. This represents your overall visibility on the platform.</title></text>
+          <text x="14" y="123" class="fn-val" fill="#13342D">130,334</text>
+          <text x="746" y="102" text-anchor="end" class="fn-name">First-page impressions</text>
+          <text x="746" y="123" text-anchor="end" class="fn-val" fill="#5D6D59">2,095</text>
+
+          <!-- ===== Row 2 · Click-through rate ===== -->
+          <polygon points="250,140 378,140 378,206 260,206" fill="#1b4138"></polygon>
+          <polygon points="382,140 510,140 500,206 382,206" fill="#835f53"></polygon>
+          <text x="308" y="178" text-anchor="middle" class="fn-in">3.85%</text>
+          <text x="448" y="178" text-anchor="middle" class="fn-in">9.53% <tspan fill="#E0B84C">★</tspan></text>
+          <text x="14" y="168" class="fn-name">Click-through rate <tspan fill="#5D6D59" font-size="11">ⓘ</tspan><title>Openings &amp; Clicks — The share of impressions that resulted in a click. It reflects how compelling your main photo, title and displayed price are at first glance.</title></text>
+          <text x="14" y="189" class="fn-val" fill="#13342D">3.85%</text>
+          <text x="746" y="168" text-anchor="end" class="fn-name">Click-through rate</text>
+          <text x="746" y="189" text-anchor="end" class="fn-val" fill="#5D6D59">9.53%</text>
+
+          <!-- ===== Row 3 · Listing views ===== -->
+          <polygon points="260,206 378,206 378,272 270,272" fill="#244e43"></polygon>
+          <polygon points="382,206 500,206 490,272 382,272" fill="#8f6a5d"></polygon>
+          <text x="310" y="244" text-anchor="middle" class="fn-in">5,019 <tspan fill="#E0B84C">★</tspan></text>
+          <text x="446" y="244" text-anchor="middle" class="fn-in">223</text>
+          <text x="14" y="234" class="fn-name">Listing views <tspan fill="#5D6D59" font-size="11">ⓘ</tspan><title>Openings &amp; Clicks — The number of guests who opened your listing. It represents interest translating into actual visits.</title></text>
+          <text x="14" y="255" class="fn-val" fill="#13342D">5,019</text>
+          <text x="746" y="234" text-anchor="end" class="fn-name">Listing views</text>
+          <text x="746" y="255" text-anchor="end" class="fn-val" fill="#5D6D59">223</text>
+
+          <!-- ===== Row 4 · Wishlist additions ===== -->
+          <polygon points="270,272 378,272 378,338 280,338" fill="#2f5d50"></polygon>
+          <polygon points="382,272 490,272 480,338 382,338" fill="#9a7668"></polygon>
+          <text x="312" y="310" text-anchor="middle" class="fn-in">114 <tspan fill="#E0B84C">★</tspan></text>
+          <text x="444" y="310" text-anchor="middle" class="fn-in">20</text>
+          <text x="14" y="300" class="fn-name">Wishlist additions <tspan fill="#5D6D59" font-size="11">ⓘ</tspan><title>Conversion — The number of guests who saved your listing. It is a signal of intent and active consideration.</title></text>
+          <text x="14" y="321" class="fn-val" fill="#13342D">114</text>
+          <text x="746" y="300" text-anchor="end" class="fn-name">Wishlist additions</text>
+          <text x="746" y="321" text-anchor="end" class="fn-val" fill="#5D6D59">20</text>
+
+          <!-- ===== Row 5 · Booking rate ===== -->
+          <polygon points="280,338 378,338 378,404 290,404" fill="#3a6b5d"></polygon>
+          <polygon points="382,338 480,338 470,404 382,404" fill="#a48274"></polygon>
+          <text x="314" y="376" text-anchor="middle" class="fn-in">0.92%</text>
+          <text x="442" y="376" text-anchor="middle" class="fn-in">1.96% <tspan fill="#E0B84C">★</tspan></text>
+          <text x="14" y="366" class="fn-name">Booking rate (view → booking) <tspan fill="#5D6D59" font-size="11">ⓘ</tspan><title>Conversion — Of the guests who viewed your listing, the share who booked. It measures whether the offer holds up once guests review the full details.</title></text>
+          <text x="14" y="387" class="fn-val" fill="#13342D">0.92%</text>
+          <text x="746" y="366" text-anchor="end" class="fn-name">Booking rate</text>
+          <text x="746" y="387" text-anchor="end" class="fn-val" fill="#5D6D59">1.96%</text>
+
+          <!-- ===== Row 6 · Overall conversion ===== -->
+          <polygon points="290,404 378,404 378,470 298,470" fill="#45796a"></polygon>
+          <polygon points="382,404 470,404 462,470 382,470" fill="#ad8e80"></polygon>
+          <text x="322" y="442" text-anchor="middle" class="fn-in">0.04%</text>
+          <text x="440" y="442" text-anchor="middle" class="fn-in">0.19% <tspan fill="#E0B84C">★</tspan></text>
+          <text x="14" y="432" class="fn-name">Overall conversion <tspan fill="#5D6D59" font-size="11">ⓘ</tspan><title>Conversion — The share of all impressions that ended in a booking. It reflects the performance of the funnel from end to end.</title></text>
+          <text x="14" y="453" class="fn-val" fill="#13342D">0.04%</text>
+          <text x="746" y="432" text-anchor="end" class="fn-name">Overall conversion</text>
+          <text x="746" y="453" text-anchor="end" class="fn-val" fill="#5D6D59">0.19%</text>
+        </svg>
+      </div>
+      <p class="kpi-note">This listing performs well on reach — impressions, views and wishlists are above comparable listings. The primary opportunity sits mid-funnel, where click-through and booking rates currently trail the market.</p>
+
+      <details class="guide-box" open>
+        <summary>How to read this funnel · hover the ⓘ on each step</summary>
+        <div class="guide-grid">
+          <div class="layer" style="border-top-color:#5D6D59;">
+            <p class="ln">1 · Positioning &amp; Views</p>
+            <h4>airbnb shows your listing</h4>
+            <div class="chips"><span class="chip">City ranking</span><span class="chip">First-page impressions</span></div>
+            <p>How visible and competitive the listing is in search. Airbnb prioritizes listings by <strong>relevance and reliability</strong>, drawing on historical performance, reviews and conversion.</p>
+            <p class="fix"><b>What we review:</b> pricing, review quality and volume, listing optimization, and positioning for the target guest segment.</p>
+          </div>
+          <div class="layer" style="border-top-color:#76574C;">
+            <p class="ln">2 · Openings &amp; Clicks</p>
+            <h4>guests open your listing</h4>
+            <div class="chips"><span class="chip">Click-through rate</span><span class="chip">Listing views</span></div>
+            <p>Of the times the listing appears, how often guests are interested enough to click. This depends on what is visible <strong>before</strong> they enter: main photo, title, price and reviews.</p>
+            <p class="fix"><b>What we review:</b> photo quality, how competitive the displayed price feels, and how the listing stands out among alternatives.</p>
+          </div>
+          <div class="layer" style="border-top-color:#13342D;">
+            <p class="ln">3 · Conversion</p>
+            <h4>guests book</h4>
+            <div class="chips"><span class="chip">Wishlists</span><span class="chip">Booking rate</span><span class="chip">Overall conversion</span></div>
+            <p>Once guests are inside — photos, description, layout and final price in context — whether they find enough to justify booking.</p>
+            <p class="fix"><b>What we review:</b> the balance between price, capacity, layout, amenities and the expectations of the target segment.</p>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- METRICS BOARD -->
+    <div class="section">
+      <p class="section-title">2 · Metrics Board — May / Jun / Jul trend</p>
+      <div class="kpi-grid">
+
+        <div class="kpi-card">
+          <div class="head"><span class="kpi-label">1st Page Impressions</span><span class="kpi-ico">👁</span></div>
+          <div class="kpi-rows">
+            <div class="kpi-r"><span class="kpi-mo">May</span><span class="kpi-v">94,880</span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jun<span class="now">Now</span></span><span class="kpi-v">130,334 <span class="arrow-up">▲</span></span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jul</span><span class="kpi-v">53,697 <span class="arrow-dn">▼</span></span></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="head"><span class="kpi-label">Click-through rate</span><span class="kpi-ico">🖱</span></div>
+          <div class="kpi-rows">
+            <div class="kpi-r"><span class="kpi-mo">May</span><span class="kpi-v">4.49%</span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jun<span class="now">Now</span></span><span class="kpi-v">3.85% <span class="arrow-dn">▼</span></span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jul</span><span class="kpi-v">3.09% <span class="arrow-dn">▼</span></span></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="head"><span class="kpi-label">Listing views</span><span class="kpi-ico">🎯</span></div>
+          <div class="kpi-rows">
+            <div class="kpi-r"><span class="kpi-mo">May</span><span class="kpi-v">4,263</span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jun<span class="now">Now</span></span><span class="kpi-v">5,019 <span class="arrow-up">▲</span></span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jul</span><span class="kpi-v">1,661 <span class="arrow-dn">▼</span></span></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="head"><span class="kpi-label">Wishlists</span><span class="kpi-ico">♡</span></div>
+          <div class="kpi-rows">
+            <div class="kpi-r"><span class="kpi-mo">May</span><span class="kpi-v">311</span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jun<span class="now">Now</span></span><span class="kpi-v">114 <span class="arrow-dn">▼</span></span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jul</span><span class="kpi-v">0 <span class="arrow-dn">▼</span></span></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="head"><span class="kpi-label">Booking rate</span><span class="kpi-ico">📈</span></div>
+          <div class="kpi-rows">
+            <div class="kpi-r"><span class="kpi-mo">May</span><span class="kpi-v">0.77%</span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jun<span class="now">Now</span></span><span class="kpi-v">0.92% <span class="arrow-up">▲</span></span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jul</span><span class="kpi-v">1.63% <span class="arrow-up">▲</span></span></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="head"><span class="kpi-label">Overall conversion</span><span class="kpi-ico">⚡</span></div>
+          <div class="kpi-rows">
+            <div class="kpi-r"><span class="kpi-mo">May</span><span class="kpi-v">0.03%</span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jun<span class="now">Now</span></span><span class="kpi-v">0.04% <span class="arrow-up">▲</span></span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jul</span><span class="kpi-v">0.05% <span class="arrow-up">▲</span></span></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="head"><span class="kpi-label">Airbnb Occupancy</span><span class="kpi-ico">📅</span></div>
+          <div class="kpi-rows">
+            <div class="kpi-r"><span class="kpi-mo">May</span><span class="kpi-v">77.4%</span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jun<span class="now">Now</span></span><span class="kpi-v">96.7% <span class="arrow-up">▲</span></span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jul</span><span class="kpi-v">74.2% <span class="arrow-dn">▼</span></span></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="head"><span class="kpi-label">Avg. Daily Rate</span><span class="kpi-ico">$</span></div>
+          <div class="kpi-rows">
+            <div class="kpi-r"><span class="kpi-mo">May</span><span class="kpi-v">$460</span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jun<span class="now">Now</span></span><span class="kpi-v">$650 <span class="arrow-up">▲</span></span></div>
+            <div class="kpi-r"><span class="kpi-mo">Jul</span><span class="kpi-v">$714 <span class="arrow-up">▲</span></span></div>
+          </div>
+        </div>
+
+      </div>
+      <p class="kpi-note">Revenue &amp; Reviews-count cards (shown in Rankbreeze) are <strong>not</strong> in this export. Revenue could be <em>derived</em> ≈ Occupancy × ADR × nights, but won't match Rankbreeze exactly — flag pending decision.</p>
+    </div>
+
+    <!-- TREND CHART -->
+    <div class="section">
+      <p class="section-title">3 · 12-month visibility trend (you vs. market)</p>
+      <div class="chart-card">
+        <div class="chart-head">
+          <span class="ttl" style="font-family:var(--display);font-style:italic;font-size:20px;text-transform:lowercase;color:var(--tobacco);">first-page impressions · 2026</span>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--cedar);"></span>You</span>
+            <span class="legend-item"><span class="legend-swatch" style="background:var(--walnut);height:2px;"></span>Market</span>
+          </div>
+        </div>
+        <!-- Server-renderable inline SVG, same pattern as renderPacingChart() -->
+        <svg class="chart-svg" viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="12-month first-page impressions">
+          <!-- bars: you (cedar). max=130334 -> scale plotH=214, padT=16 -->
+          <!-- months Jan..Dec, values 45,17657,82411,36763,94880,130334,53697,5688,391,0,0,0 -->
+          <!-- x slot = 744/12 = 62, barW=20 -->
+          <g>
+            <rect x="21"  y="230" width="20" height="0.1" rx="2" fill="#13342D"></rect>
+            <rect x="83"  y="201" width="20" height="29"  rx="2" fill="#13342D"></rect>
+            <rect x="145" y="95"  width="20" height="135" rx="2" fill="#13342D"></rect>
+            <rect x="207" y="170" width="20" height="60"  rx="2" fill="#13342D"></rect>
+            <rect x="269" y="74"  width="20" height="156" rx="2" fill="#13342D"></rect>
+            <rect x="331" y="16"  width="20" height="214" rx="2" fill="#13342D"></rect>
+            <rect x="393" y="142" width="20" height="88"  rx="2" fill="#13342D" fill-opacity="0.55"></rect>
+            <rect x="455" y="221" width="20" height="9"   rx="2" fill="#13342D" fill-opacity="0.38"></rect>
+            <rect x="517" y="229" width="20" height="1"   rx="2" fill="#13342D" fill-opacity="0.38"></rect>
+            <rect x="579" y="230" width="20" height="0.1" rx="2" fill="#13342D" fill-opacity="0.38"></rect>
+            <rect x="641" y="230" width="20" height="0.1" rx="2" fill="#13342D" fill-opacity="0.38"></rect>
+            <rect x="703" y="230" width="20" height="0.1" rx="2" fill="#13342D" fill-opacity="0.38"></rect>
+          </g>
+          <!-- market reference ticks (walnut) values 2437,2625,1230,532,952,2095,1906,507,28,0,0,0 (scaled, tiny) -->
+          <g stroke="#76574C" stroke-width="2" stroke-linecap="round">
+            <line x1="19" y1="226" x2="43" y2="226"></line>
+            <line x1="81" y1="226" x2="105" y2="226"></line>
+            <line x1="143" y1="228" x2="167" y2="228"></line>
+            <line x1="205" y1="229" x2="229" y2="229"></line>
+            <line x1="267" y1="228" x2="291" y2="228"></line>
+            <line x1="329" y1="227" x2="353" y2="227"></line>
+            <line x1="391" y1="227" x2="415" y2="227"></line>
+            <line x1="453" y1="229" x2="477" y2="229"></line>
+          </g>
+          <!-- forecast divider after Jun (x = 21 + 62*6 = 393) -->
+          <line x1="393" y1="16" x2="393" y2="230" stroke="#e6e2d5" stroke-width="1.5" stroke-dasharray="3 4"></line>
+          <!-- labels -->
+          <g font-family="Inter,sans-serif" font-size="11" font-weight="500" fill="#76574C" text-anchor="middle">
+            <text x="31" y="250">Jan</text><text x="93" y="250">Feb</text><text x="155" y="250">Mar</text><text x="217" y="250">Apr</text>
+            <text x="279" y="250">May</text><text x="341" y="250">Jun</text><text x="403" y="250">Jul</text><text x="465" y="250">Aug</text>
+            <text x="527" y="250">Sep</text><text x="589" y="250">Oct</text><text x="651" y="250">Nov</text><text x="713" y="250">Dec</text>
+          </g>
+        </svg>
+        <p class="kpi-note">Solid = actuals (Jan–Jun) · muted = forward pace (Jul+) · tick = market average. Same SVG technique as your existing <code>renderPacingChart()</code> — no client-side JS.</p>
+      </div>
+    </div>
+
+    <!-- RANKING SNAPSHOT -->
+    <div class="section">
+      <p class="section-title">4 · City search ranking — snapshot by guest count</p>
+      <div class="rank-card">
+        <div class="rank-grid">
+          <div class="rank-pod"><div class="g">1 guest</div><div class="p">#6</div><div class="s">Page 1</div></div>
+          <div class="rank-pod"><div class="g">2 guests</div><div class="p">#2</div><div class="s">Page 1</div></div>
+          <div class="rank-pod"><div class="g">3 guests</div><div class="p">#7</div><div class="s">Page 1</div></div>
+          <div class="rank-pod"><div class="g">4 guests</div><div class="p">#5</div><div class="s">Page 1</div></div>
+        </div>
+        <p class="kpi-note">Single-day snapshot (25 Jun). The Rankbreeze daily line-chart needs accumulated exports — <strong>per your call, time-series is deferred</strong>; we show today's position by party size instead.</p>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p class="footer-label">Managed by RevFactor</p>
+      <p class="footer-tag">intelligent pricing for inspired stays</p>
+    </footer>
+
+  </div>
+</div>
+</body>
+</html>
