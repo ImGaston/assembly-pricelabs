@@ -14,6 +14,7 @@ export async function GET(request, { params }) {
   const url = new URL(request.url);
   const token = url.searchParams.get('token');
   const tab = url.searchParams.get('tab') === 'seo' ? 'seo' : 'pricing';
+  const listing = url.searchParams.get('listing'); // drill-down: single-listing view
 
   const auth = await validateClient(slug, token);
 
@@ -47,7 +48,7 @@ export async function GET(request, { params }) {
           ? generateMockSeoData(auth.client.demoListings)
           : await getClientSeo(auth.client);
 
-      const html = renderDashboard(auth.client, null, { tab: 'seo', seo });
+      const html = renderDashboard(auth.client, null, { tab: 'seo', seo, listing });
       const isEmpty = !seo || !seo.listings || seo.listings.length === 0;
 
       return new Response(html, {
@@ -85,7 +86,7 @@ export async function GET(request, { params }) {
         );
       }
     }
-    const html = renderDashboard(auth.client, data, { tab: 'pricing', seo: null });
+    const html = renderDashboard(auth.client, data, { tab: 'pricing', seo: null, listing });
     const isEmpty = !data.listings || data.listings.length === 0;
 
     return new Response(html, {

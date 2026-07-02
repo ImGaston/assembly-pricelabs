@@ -54,7 +54,7 @@ Local smoke test: `http://localhost:3000/api/dashboard/demo?token=demo_revfactor
 ## The route
 
 `app/api/dashboard/[slug]/route.js` — single `GET` handler.
-- Query params: `token` (required, per-client secret), `tab` (`pricing` default | `seo`).
+- Query params: `token` (required, per-client secret), `tab` (`pricing` default | `seo`), `listing` (drill-down: renders the per-listing view — SEO single funnel by `hubListingId`, pricing detail by `listingId`).
 - Flow: `validateClient(slug, token)` → pick data source → `renderDashboard(client, data, { tab, seo })`.
 - Pricing data source order: demo mock → `getClientReport` (Supabase) → `fetchClientData` (live PriceLabs) → error.
 - SEO tab: demo mock → `getClientSeo` (Supabase view); `null` renders an empty state (still 200).
@@ -71,7 +71,7 @@ Local smoke test: `http://localhost:3000/api/dashboard/demo?token=demo_revfactor
 | `reports.js` | `getClientReport` — primary pricing source (report_* tables) | Map, 30 min |
 | `seo.js` | `getClientSeo` — Airbnb funnel data from `seo_metrics` view | Map, 30 min |
 | `mock-data.js` | `generateMockData`, `generateMockReportData`, `generateMockSeoData` | — |
-| `render.js` | `renderDashboard(client, data, { tab, seo })`, `renderErrorPage`; pricing + SEO components; `c`/`f` token helpers; inline SVG | — |
+| `render.js` | `renderDashboard(client, data, { tab, seo, listing })`, `renderErrorPage`; pricing + SEO components; per-listing pricing detail (`renderListingDetail` + `ld*` chart builders, 4 sub-views, enhanced by `LISTING_DETAIL_JS`); SEO drill-down links; `c`/`f` token helpers; inline SVG | — |
 
 ## Supabase schema (Hub project `revfactorHub`)
 

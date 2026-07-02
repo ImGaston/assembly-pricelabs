@@ -12,8 +12,9 @@ How to write code that fits this repo. See also:
 
 ## Rendering (the core pattern)
 
-- **Server-rendered HTML strings only. No client-side JavaScript** — no `<script>`, no hydration, no fetch in the browser. Interactivity is done with plain links (e.g. the pricing/SEO tabs) and CSS (`<details>` for collapsibles).
-- **Charts are inline SVG**, computed server-side (see `renderPacingChart` and the SEO funnel/trend in `lib/render.js`). Clone those patterns for new charts.
+- **Server-renders all content; JS is progressive enhancement only** (see `decisions.md` 2026-07-02). Prefer plain links (tabs, SEO drill-down) and CSS (`<details>`). Add a `<script>` only to *enhance* server-rendered content — never to fetch or build the base view.
+- **Charts are inline SVG**, computed server-side (see `renderPacingChart`, the SEO funnel/trend, and the per-listing `ld*` chart builders in `lib/render.js`). Clone those patterns for new charts.
+- **When you do add JS** (e.g. `LISTING_DETAIL_JS`, `renderListingDetail`): keep it one small inline vanilla script; the view must render fully with JS off (stacked panels reachable via `?listing=`/`?tab=`). Only public metrics may be embedded for the client — **never secrets** (rule #2). Escape any data put in a `data-tip`/JSON payload (`JSON.stringify(x).replace(/</g,'\\u003c')`). Don't write JS that changes iframe height (breaks Assembly's embed); tabs/tooltips are height-neutral.
 - **Styling is inline CSS** in one `<style>` block built from design tokens. Use the `c` (colors) and `f` (font families) helpers in `render.js`; never hardcode hex/fonts.
 - **Scope new CSS** to avoid collisions — e.g. SEO styles live under `.seo-view`. Reuse existing class names only within their scope.
 - **Always `escapeHtml()`** any dynamic value put into HTML or SVG (`title`s, names, cities, etc.).

@@ -15,6 +15,13 @@ Format:
 
 ---
 
+## 2026-07-02 — Adopt client-side JS as progressive enhancement (relax the no-JS rule)
+
+- **Decision:** The old "no client-side JavaScript" rule is relaxed to **"JS only as progressive enhancement."** The server still renders all content/data (charts stay inline SVG); JS may add client-side sub-tabs and hover tooltips, but every view must remain reachable and readable with JS off (URL-param routing + stacked panels).
+- **Why:** Per-listing reports (pricing detail with 4 sub-views, SEO drill-down) need interactivity (tabs, tooltips) to reach parity with the Hub's `listing-report-dashboard.tsx`. A throwaway probe (`/api/dashboard/jstest`) confirmed **Assembly's iframe executes JS** and does not sandbox it out.
+- **Details:** Pricing per-listing detail (`renderListingDetail` in `lib/render.js`) ships server-rendered SVG + tables for all 4 panels; a small inline script (`LISTING_DETAIL_JS`) toggles panels + drives one shared `#ld-tip` tooltip. SEO drill-down (cards/matrix → single funnel) is server-routed via `?listing=<hubListingId>` (works fully without JS).
+- **Trade-off / guardrails:** Rule #2 (no secrets in HTML) is unchanged and now more important — any JSON embedded for the client must carry only already-public report metrics. Avoid JS that changes iframe height (breaks Assembly's fixed-height embed); tabs/tooltips are height-neutral.
+
 ## 2026-07-02 — SEO Visibility tab (Rankbreeze)
 
 - **Decision:** Add a second dashboard tab (`?tab=seo`) showing each listing's Airbnb search funnel (visibility → interest → conversion) vs. similar listings, from a manually-loaded Rankbreeze CSV. Same URL/auth as pricing.
