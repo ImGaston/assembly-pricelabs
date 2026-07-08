@@ -85,7 +85,7 @@ Tables are created/managed by hand via `migrations/` in the Supabase SQL editor.
 
 **Report-backed pricing layout** (`data.source === 'report'`): KPI cards ([Year] Revenue w/ YoY, Occupancy next-4mo vs market, RevPAR Index, Avg Booking Window, Nights Booked 30d), a revenue **pacing chart** (inline SVG: solid = booked months, muted = pace, tick = same-time-last-year), and the listings table. The legacy live-API layout (`renderKpiCards`/`renderListingsTable`) still renders for fallback clients.
 - **`seo_metrics_raw`** — 1:1 with the Rankbreeze CSV: `download_date`, `airbnb_id`, `rankbreeze_id`, `listing_name`, `city`, `state`, `country`, `metric`, `guest_count`, `side`, `period`, `value` (RLS enabled)
-- **`seo_metrics`** (view) — normalizes `metric`→`metric_key`, `side`→`my`/`similar`, and joins `listings` on `airbnb_id` to resolve `hub_listing_id` / `hub_client_id` (null when unmatched)
+- **`seo_metrics`** (view) — normalizes `metric`→`metric_key`, `side`→`my`/`similar`, joins `listings` on `airbnb_id` to resolve `hub_listing_id` / `hub_client_id` (null when unmatched), and exposes `raw_id` (= raw table pk, migration 004) for stable pagination. Multiple upload batches coexist (one per `download_date`; the Hub upload replaces same-date rows only) — `lib/seo.js` keeps, per listing, the newest batch that has non-null monthly values (Rankbreeze exports can arrive all-null for unrefreshed listings).
 
 Join chain (SEO): CSV `Airbnb ID` = `listings.airbnb_id` (from `airbnb_link`) → `listings.id` → `listings.client_id` = `clients.id`.
 

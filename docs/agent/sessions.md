@@ -13,7 +13,13 @@ How to maintain:
 
 ---
 
-## 2026-07-02 — SEO Visibility tab + agent memory init
+## 2026-07-08 — SEO read-side fixes: pagination + per-listing batch selection
+
+- **Diagnosed "new SEO upload not visible"** (Derek Clifton, listing `3ba45167…`): data + view join were fine; the real causes were in `lib/seo.js`.
+- **Fixed 1000-row truncation**: PostgREST caps responses at 1000 rows; `getClientSeo` fetched unpaged, so large clients silently lost listings (prod showed 3 of 36 for the biggest client). Now pages by `raw_id` (migration `004_seo_metrics_raw_id.sql`, applied to the Hub DB).
+- **Fixed multi-batch mixing**: multiple `download_date` batches coexist; buckets mixed dates non-deterministically and "Last updated" showed an arbitrary row's date. Now each listing keeps its newest batch **with non-null monthly values** — the Jul 3 export arrived all-null for 112/237 listings (Rankbreeze-side; needs re-export + re-upload).
+- **Verified** locally against real Hub data: single-funnel client, 36-listing matrix client, demo; no secrets in HTML.
+- **Next:** push to `main` (deploy also purges the 6 h CDN cache — that's the only invalidation mechanism after an upload); re-export the Jul 3 CSV from Rankbreeze and re-upload it in the Hub.
 
 - **Shipped the SEO Visibility tab** (`?tab=seo`): migration `003_seo_metrics.sql`, `lib/seo.js`, SEO render components in `lib/render.js`, route branch, `generateMockSeoData`. Two commits on branch `claude/keen-merkle-3664ed` (`575c4ca` report module, `38645f0` SEO tab). See [decisions](decisions.md).
 - **Verified** all three layouts (1 = funnel, 2–7 = cards, 8+ = matrix) against `docs/seo-drafts/` via the browser preview; no client JS.

@@ -31,7 +31,7 @@ Rankbreeze export) refreshes at most daily, so these TTLs are generous.
 
 - **PriceLabs `GET /v1/listings`** returns ~488 listings for the whole account, then filters by group. Fetched once and cached 6 h — avoid calling it per client.
 - **`getClientReport`** joins `report_listings` + `report_metrics` (12 months/listing) — cached 30 min per client.
-- **`getClientSeo`** reads the `seo_metrics` view (source table ~44k rows) filtered by `hub_client_id`; the join rides on the indexed generated `listings.airbnb_id`. Cached 30 min per client.
+- **`getClientSeo`** reads the `seo_metrics` view (source table grows by ~48k rows per upload batch) filtered by `hub_client_id`; the join rides on the indexed generated `listings.airbnb_id`. Cached 30 min per client. **PostgREST caps every response at 1000 rows** — the fetch pages via `.order('raw_id').range(...)` in 1000-row chunks (largest client ≈ 15 pages). Any new Supabase read that can exceed 1000 rows must paginate the same way or it silently truncates.
 
 ## Recommendations
 
