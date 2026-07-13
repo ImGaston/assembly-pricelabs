@@ -13,6 +13,19 @@ How to maintain:
 
 ---
 
+## 2026-07-13 — Fix 404 on "← Back to portfolio" (SWC minifier bug)
+
+- **Diagnosed prod-only 404**: back links in the drill-down views rendered as
+  `/api/dashboard/<id>&token=…` (missing `?tab=…`) in production, so the slug became
+  `<id>&token=…` → 404. `next dev` rendered correctly; only minified builds broke.
+- **Root cause**: SWC minifier drops the static `?tab=…` chunk when folding
+  template-literal concatenation inlined into another template — see
+  [conventions](conventions.md) → Gotchas. Not a stale deploy: a fresh clean build
+  reproduced it.
+- **Fix**: `pricingBackHref` / `seoBackHref` rewritten as single template literals.
+  Verified with `next build && next start`: back links correct, and dev-vs-prod href
+  parity checked across all four demo views. Deployed to prod.
+
 ## 2026-07-08 — SEO read-side fixes: pagination + per-listing batch selection
 
 - **Diagnosed "new SEO upload not visible"** (Derek Clifton, listing `3ba45167…`): data + view join were fine; the real causes were in `lib/seo.js`.

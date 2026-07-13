@@ -40,6 +40,15 @@ How to write code that fits this repo. See also:
 - Wrap data fetch + render in `try/catch`; log with `console.error` and return a 500 error page. Never leak stack traces or keys into the response.
 - Missing/empty data is a normal path (empty state / `no-store`), not an error.
 
+## Gotchas
+
+- **SWC minifier drops static template chunks (Next 14.2.35).** A helper returning
+  `` `…?tab=x` + `&token=${…}` `` (template-literal concatenation), when inlined by the
+  minifier into another template, loses the static `?tab=x` part — prod builds emitted
+  `/api/dashboard/demo&token=…` → 404, while `next dev` was fine. Write URL-building
+  helpers as a **single template literal** (no `+` between templates) and verify prod
+  behavior with `next build && next start`, not just `next dev`. (2026-07-13, back links.)
+
 ## Testing
 
 - **No test framework or CI is configured (TBD).** Verify changes by running the app — see AGENTS.md → Verification Defaults and use the browser-preview MCP tools (screenshot, console, snapshot).
