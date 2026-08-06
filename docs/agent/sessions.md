@@ -13,6 +13,37 @@ How to maintain:
 
 ---
 
+## 2026-08-06 — Recent Reservations section (pricing tab)
+
+- **New section after Portfolio Overview**: last 6 confirmed bookings (listing,
+  booked date, stay, nights, channel, revenue). Renders in both report and legacy
+  layouts; hidden in the per-listing drill-down and when there's no data.
+- **New module** [`lib/reservations.js`](../../lib/reservations.js) reading the
+  `pricelabs_reservations_cache` **materialized view** (per-client, `booking_status
+  = 'booked'`, newest `booked_at` first). The view duplicates a reservation across
+  listing-name mappings → over-fetch 4× and dedupe by `reservation_key`. Fetch
+  errors degrade to an empty section (no 500). Demo uses `generateMockReservations`.
+- Added ADR (revenue ÷ nights) and Book Window (`booking_window_days`) columns.
+- The pricing drill-down's Overview panel ends with the same table filtered to
+  that listing (`getListingReservations`, keyed cache `clientId|listingId`).
+- **Drill-down affordance**: listing names in portfolio tables now render in cedar
+  with the "View report →" CTA always visible (opacity .6 → 1 + arrow nudge on
+  hover) — it was invisible until hover. Applied to both pricing and SEO tables.
+- **Focus list → Highlights** (pricing drill-down, `ldOverview`): the card is
+  client-facing, so it now surfaces only positive signals (pacing ahead of STLY,
+  RevPAR Index ≥ 105, occupancy above market, YoY > 10) — the internal
+  action/watch flags ("check rates", "below market") were removed; RevFactor
+  raises those directly, not via the dashboard.
+- **SEO funnel polish**: stage rows wrapped in `g.fn-row` with a CSS-only hover
+  spotlight (hovered stage scales 1.04, siblings dim via `svg:has(...)`; no JS).
+  Fixed value overflow on the two narrowest stages (Booking rate, Overall
+  conversion): white in-polygon numbers spilled onto the paper background and
+  vanished — now smaller (`geo.inSize` 12/11px) and recentered on the polygon.
+- Verified on `next dev`: demo + a real client (deduped rows, no secrets in HTML),
+  drill-down unaffected; funnel values checked in-bounds via `getBBox()`.
+  Gotcha: running `next build` while `next dev` is up
+  corrupts `.next` (500s, MODULE_NOT_FOUND) — stop dev or `rm -rf .next` after.
+
 ## 2026-07-13 — Fix 404 on "← Back to portfolio" (SWC minifier bug)
 
 - **Diagnosed prod-only 404**: back links in the drill-down views rendered as

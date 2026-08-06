@@ -2,7 +2,8 @@ import { validateClient } from '../../../../lib/auth.js';
 import { fetchClientData } from '../../../../lib/pricelabs.js';
 import { getClientReport } from '../../../../lib/reports.js';
 import { getClientSeo } from '../../../../lib/seo.js';
-import { generateMockReportData, generateMockSeoData } from '../../../../lib/mock-data.js';
+import { getClientReservations, getListingReservations } from '../../../../lib/reservations.js';
+import { generateMockReportData, generateMockReservations, generateMockSeoData } from '../../../../lib/mock-data.js';
 import { renderDashboard, renderErrorPage } from '../../../../lib/render.js';
 
 /**
@@ -86,7 +87,22 @@ export async function GET(request, { params }) {
         );
       }
     }
-    const html = renderDashboard(auth.client, data, { tab: 'pricing', seo: null, listing });
+    // Recent reservations — portfolio-wide on the roll-up, filtered to the one
+    // listing on the drill-down's Overview. Fetch failures degrade to an empty
+    // section inside the module.
+    let reservations;
+    if (auth.client.useMockData && auth.client.demoListings) {
+      const pool = listing
+        ? auth.client.demoListings.filter((l) => String(l.listingId) === String(listing))
+        : auth.client.demoListings;
+      reservations = generateMockReservations(pool);
+    } else {
+      reservations = listing
+        ? await getListingReservations(auth.client, listing)
+        : await getClientReservations(auth.client);
+    }
+
+    const html = renderDashboard(auth.client, data, { tab: 'pricing', seo: null, listing, reservations });
     const isEmpty = !data.listings || data.listings.length === 0;
 
     return new Response(html, {
