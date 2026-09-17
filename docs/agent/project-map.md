@@ -94,3 +94,7 @@ Join chain (SEO): CSV `Airbnb ID` = `listings.airbnb_id` (from `airbnb_link`) �
 ## SEO data shape (from `getClientSeo` / mock)
 
 Per listing: `funnel` (6 stages `{my, similar, ratio}`), `health {above,total}`, `rank {pods[], avg, marketAvg}`, `board` (prev/current/next month per metric), `trend` (12-month my-vs-market). Layout by count: **1** → funnel · **2–7** → cards · **8+** → matrix (`SEO_LAYOUT` in `render.js`). Visual source of truth: [`docs/seo-drafts/`](../seo-drafts/).
+
+
+## 2026-09-17 — Two-property Blackbird training demo
+Added `demo-blackbird` as a separate synthetic client in `lib/clients.js`, reusing the existing demo authorization and mock data path. Ashwood (Grand Prairie) and Guatemala (Buenos Aires) only; header is Blackbird Demo Portfolio with Sample Data badge and fictional-training context. Pricing, SEO, reservations and both listing drill-downs use generated data, with no database reads or mutations. The generic eight-property demo and real clients are unchanged. Production build and six rendered route checks passed without database credentials; invalid token rejects. This route is intended for the internal Assembly test account's Dashboard embed, replacing its incorrect real-client URL.

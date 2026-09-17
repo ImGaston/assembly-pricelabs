@@ -70,3 +70,7 @@ How to maintain:
 - **Data loaded:** Rankbreeze CSV imported into `seo_metrics_raw` (43,991 rows, 218 Airbnb IDs; 191 matched, 27 unmatched, 76 clients with coverage). RLS enabled on the table.
 - **Initialized this agent-memory system**: `AGENTS.md` as the routing file, `CLAUDE.md` → `@AGENTS.md`, and `docs/agent/` (this folder). The former knowledge-dump `AGENTS.md`/`CLAUDE.md` content was distilled into `project-map.md` / `conventions.md` / `integrations.md`.
 - **Next:** confirm real clients render with `.env.local` creds; open PR `claude/keen-merkle-3664ed` → `main`; then run migration `003` in Supabase for prod (already imported to the Hub); decide funnel period semantics (last-complete-month vs snapshot-month) once reviewing real exports.
+
+
+## 2026-09-17 — Two-property Blackbird training demo
+Added `demo-blackbird` as a separate synthetic client in `lib/clients.js`, reusing the existing demo authorization and mock data path. Ashwood (Grand Prairie) and Guatemala (Buenos Aires) only; header is Blackbird Demo Portfolio with Sample Data badge and fictional-training context. Pricing, SEO, reservations and both listing drill-downs use generated data, with no database reads or mutations. The generic eight-property demo and real clients are unchanged. Production build and six rendered route checks passed without database credentials; invalid token rejects. This route is intended for the internal Assembly test account's Dashboard embed, replacing its incorrect real-client URL.
