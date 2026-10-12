@@ -42,8 +42,13 @@ Local smoke test: `http://localhost:3000/api/dashboard/demo?token=demo_revfactor
 ├── migrations/               # SQL, run manually in Supabase (NOT auto-applied)
 │   ├── 001_seed_clients_pricelabs.sql
 │   ├── 002_add_dashboard_url.sql
-│   └── 003_seo_metrics.sql   # airbnb_id generated col + seo_metrics_raw + seo_metrics view
-├── app/api/dashboard/[slug]/route.js   # the only route
+│   ├── 003_seo_metrics.sql   # airbnb_id generated col + seo_metrics_raw + seo_metrics view
+│   ├── 004_seo_metrics_raw_id.sql
+│   ├── 005_dashboard_manager.sql  # clients.dashboard_variant + dashboards table
+│   └── 006_dashboard_layouts.sql  # clients.dashboard_layout + dashboards.layout
+├── app/api/dashboard/[slug]/route.js   # client dashboards (raw HTML)
+├── app/admin/                # internal Dashboard Manager (React, password login)
+├── app/layout.js             # root layout for React pages (admin only)
 ├── lib/                      # all logic
 ├── public/logo.svg
 ├── next.config.js
@@ -55,17 +60,32 @@ Local smoke test: `http://localhost:3000/api/dashboard/demo?token=demo_revfactor
 
 `app/api/dashboard/[slug]/route.js` — single `GET` handler.
 - Query params: `token` (required, per-client secret), `tab` (`pricing` default | `seo`), `listing` (drill-down: renders the per-listing view — SEO single funnel by `hubListingId`, pricing detail by `listingId`).
-- Flow: `validateClient(slug, token)` → pick data source → `renderDashboard(client, data, { tab, seo })`.
+- `slug` is a client UUID, a hardcoded demo (`demo`, `demo-blackbird`), or a **managed dashboard slug** from the `dashboards` table (see below).
+- Flow: `validateClient(slug, token)` → pick data source → `getLayout(client.layout).render(...)` (dashboard **model**, see `lib/layouts/`; `?layout=<key>` override works only outside production) → `renderDashboard(client, data, { tab, seo })`.
 - Pricing data source order: demo mock → `getClientReport` (Supabase) → `fetchClientData` (live PriceLabs) → error.
 - SEO tab: demo mock → `getClientSeo` (Supabase view); `null` renders an empty state (still 200).
-- Response headers set here **and** in `vercel.json`: `X-Frame-Options: ALLOWALL`, `CSP frame-ancestors *`, `ACAO: *` (iframe-embeddable). Cache: `s-maxage=21600, stale-while-revalidate=3600`, or `no-store` when empty.
+- Response headers set here **and** in `vercel.json`: `X-Frame-Options: ALLOWALL`, `CSP frame-ancestors *`, `ACAO: *` (iframe-embeddable). Cache: `s-maxage=21600, stale-while-revalidate=3600`, or `no-store` when empty **or** when the dashboard is managed / `variant === 'beta'` (so disabling a beta link takes effect).
+- Linked managed dashboards keep `client.id` = slug (for rendered links) and carry `client.dataClient` (the real Hub client) — data readers keyed on the Hub UUID (`getClientReport`, `getClientSeo`, reservations) must receive `dataClient`.
+
+## Admin — Dashboard Manager (`/admin`)
+
+Internal-only React pages (server components + Server Actions; forms work without JS). Not iframe-embedded (`X-Frame-Options: DENY`, `noindex`).
+- `/admin/login` — single shared password (`ADMIN_PASSWORD`) → signed HttpOnly cookie `rf_admin` (7 days, path `/admin`). `noindex` + `X-Frame-Options: DENY` set in `next.config.js`.
+- `/admin` — lists managed dashboards + all clients with copyable links; per-client stable/beta toggle.
+- `/admin/dashboards/new`, `/admin/dashboards/[id]` — create/edit a managed dashboard (sample data or linked to a real client), enable/expire, regenerate token.
+- Look: mirrors the RevFactor Hub (shadcn tokens in `app/admin/styles.js`, Geist font, Hub logos in `public/admin/`), not the dashboard brand tokens — see decisions 2026-10-12.
+- Code: `app/admin/actions.js` (Server Actions, each calls `requireAdmin()`), `lib/admin.js` (service-role writes), `lib/admin-auth.js` (`checkPassword`, `startSession`, `requireAdmin`).
 
 ## `lib/` modules
 
 | File | Responsibility | Cache |
 |---|---|---|
 | `supabase.js` | service-role Supabase singleton (`getSupabase`) | — |
-| `clients.js` | `getClientById` (+ hardcoded `demo`) | Map, 10 min |
+| `clients.js` | `getClientById` — demos → client UUID → managed `dashboards` slug | Map, 10 min (managed: 60 s) |
+| `admin.js` | admin data layer: list clients/dashboards, create/update dashboards, variant toggle, token regen, `dashboardUrl` | — |
+| `layouts/` | Dashboard **models**: `index.js` registry (`listLayouts`, `getLayout` → falls back to `standard`), one file per model. `standard.js` wraps `renderDashboard`; `performance-report.js` = single-page report (year/month KPI cards, Airbnb funnel vs similar listings, per-listing table, 3 SVG trend charts + monthly table, day-of-week insights, glossary) | — |
+| `day-of-week.js` | `getClientDayOfWeek(client, { year, listingIds })` — paginated reservations, revenue spread per night, bucketed by weekday; availability = listings × weekdays in the year (errors → null) | Map, 30 min |
+| `admin-auth.js` | `/admin` password check + HMAC-signed session cookie (`requireAdmin`) | — |
 | `auth.js` | `validateClient` — UUID + token, `timingSafeEqual` | — |
 | `pricelabs.js` | `fetchClientData` — live PriceLabs `/v1/listings`, filter by group | Map, 6 h |
 | `reports.js` | `getClientReport` — primary pricing source (report_* tables) | Map, 30 min |
@@ -78,7 +98,8 @@ Local smoke test: `http://localhost:3000/api/dashboard/demo?token=demo_revfactor
 
 Tables are created/managed by hand via `migrations/` in the Supabase SQL editor.
 
-- **`clients`** — `id` (uuid, in URL), `name`, `dashboard_token`, `dashboard_url` (generated), `pricelabs_group`, `market`, `status`
+- **`clients`** — `id` (uuid, in URL), `name`, `dashboard_token`, `dashboard_url` (generated), `pricelabs_group`, `market`, `status`, `dashboard_layout` (model key, migration 006, default `standard`), `dashboard_variant` (`stable`|`beta`, migration 005 — beta shows a "Beta Preview" badge; gate experimental sections on `client.variant === 'beta'`)
+- **`dashboards`** (migration 005, RLS on, no policies) — admin-managed isolated dashboards: `slug` (URL), `name`, `market`, `client_id` (null → sample data from `demo_listings` jsonb `[{listingId,name,city}]`), `variant`, `layout` (model key, migration 006), `token`, `enabled`, `expires_at`, `notes`, `created_by`. Disabled/expired → 404.
 - **`listings`** — `id` (uuid), `client_id` → clients.id, `name`, `listing_id` (PriceLabs id, text), `airbnb_link`, **`airbnb_id`** (generated STORED from `airbnb_link` via `/rooms/(\d+)`), `city`, `state`
 - **`report_runs`** — one row per daily ingestion of the PriceLabs report (template `12127`). Dashboard uses the latest `status='completed'` (`order by completed_at desc`). Fields: `id`, `status`, `completed_at`, `listing_count`, `metric_row_count`, `report_currency` (USD).
 - **`report_listings`** — bridge: `report_run_id`, `listing_id` (PriceLabs id) → `hub_client_id` (= clients.id) + `hub_listing_id` (= listings.id), `listing_name`, `city`, `bedroom_count`, `group_name`, `is_parent`. Filter by `hub_client_id` + latest run; sub-units prefixed `_units_` are dropped (the parent represents them).
@@ -94,7 +115,3 @@ Join chain (SEO): CSV `Airbnb ID` = `listings.airbnb_id` (from `airbnb_link`) �
 ## SEO data shape (from `getClientSeo` / mock)
 
 Per listing: `funnel` (6 stages `{my, similar, ratio}`), `health {above,total}`, `rank {pods[], avg, marketAvg}`, `board` (prev/current/next month per metric), `trend` (12-month my-vs-market). Layout by count: **1** → funnel · **2–7** → cards · **8+** → matrix (`SEO_LAYOUT` in `render.js`). Visual source of truth: [`docs/seo-drafts/`](../seo-drafts/).
-
-
-## 2026-09-17 — Two-property Blackbird training demo
-Added `demo-blackbird` as a separate synthetic client in `lib/clients.js`, reusing the existing demo authorization and mock data path. Ashwood (Grand Prairie) and Guatemala (Buenos Aires) only; header is Blackbird Demo Portfolio with Sample Data badge and fictional-training context. Pricing, SEO, reservations and both listing drill-downs use generated data, with no database reads or mutations. The generic eight-property demo and real clients are unchanged. Production build and six rendered route checks passed without database credentials; invalid token rejects. This route is intended for the internal Assembly test account's Dashboard embed, replacing its incorrect real-client URL.
