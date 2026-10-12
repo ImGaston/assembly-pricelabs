@@ -14,6 +14,8 @@ Set in Vercel → Project Settings → Environment Variables, and locally in `.e
 | `NEXT_PUBLIC_SUPABASE_URL` | `lib/supabase.js` | yes (public URL) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | (present; app uses service role) | yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | `lib/supabase.js` | **no — bypasses RLS** |
+| `ADMIN_PASSWORD` | `lib/admin-auth.js` — shared `/admin` password; also keys the session HMAC (changing it signs everyone out) | no |
+| `NEXT_PUBLIC_SITE_URL` | admin share links (default prod URL) | yes |
 
 The SEO tab needs only the Supabase URL + service-role key. The pricing tab's live
 fallback additionally needs `PRICELABS_API_KEY`.
@@ -49,4 +51,5 @@ fallback additionally needs `PRICELABS_API_KEY`.
 
 ## Webhooks / external auth
 
-- **None.** No inbound webhooks; no OAuth/SSO. The only auth is the per-client URL token validated in `lib/auth.js`.
+- No inbound webhooks. Client dashboards authenticate only with the per-dashboard URL token (`lib/auth.js`).
+- `/admin` uses a single shared password (`ADMIN_PASSWORD`), not Supabase Auth — the Hub's Auth is reserved for the Hub app.

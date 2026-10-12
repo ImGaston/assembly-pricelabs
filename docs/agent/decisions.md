@@ -15,6 +15,19 @@ Format:
 
 ---
 
+## 2026-10-12 — Dashboard models live in code, assignment lives in the DB
+
+- **Decision:** A "model" is a render function in `lib/layouts/` registered by key; `clients.dashboard_layout` / `dashboards.layout` pick one (migration 006). New models are built in code (with Claude in chat) and deployed; `/admin` only assigns them.
+- **Why:** Keeps dashboards server-rendered and reviewable in git; avoids building a visual dashboard builder.
+- **Trade-offs:** A new model needs a deploy; assigning/reverting doesn't. Non-standard models are served `no-store`. Switching a client's *existing* link can lag up to 6 h because the prior standard response may be in the CDN — test with clients via beta dashboard links (always `no-store`).
+
+## 2026-10-12 — Dashboard Manager: password-protected `/admin` + `dashboards` table
+
+- **Decision:** Add an internal admin (`/admin`, React server components + Server Actions) behind a single shared password (`ADMIN_PASSWORD`, HMAC-signed HttpOnly cookie). Supabase Auth was tried first and dropped: the Hub project's Auth belongs to the Hub app, and magic links would create users there. Beta dashboards are rows in a new `dashboards` table (own slug + token, sample or linked-real data, enable/expiry), plus a per-client `clients.dashboard_variant` flag.
+- **Why:** New demo/beta dashboards previously required a code change + deploy (`demo-blackbird`) and reused the shared demo token. Betas for client feedback need self-serve creation and revocable, per-dashboard links.
+- **Trade-offs:** First React/JS-dependent surface in the repo — acceptable because it's internal; Critical Rule #1 (progressive enhancement) still applies to client dashboards, and admin forms still submit without JS. Managed/beta dashboards are served `no-store` (no CDN cache) so disable/expiry is immediate; per-instance memory cache is 60 s for managed rows and 10 min for clients, so a client variant toggle can lag up to 10 min. Hardcoded demos kept for back-compat. Password = no per-user audit (`created_by` is `'admin'`); failed logins are delayed 1 s but not rate-limited.
+- **Admin styling follows the Hub, not the dashboard brand:** `app/admin/styles.js` copies the RevFactor Hub's shadcn tokens (neutral oklch palette, green primary, Geist via the `geist` package, rounded controls, hairline borders + soft elevation, `prefers-color-scheme` dark). Critical Rule #3 (design tokens, no 1px borders/shadows) applies to client dashboards only. Plain CSS — no Tailwind added; resync by hand if the Hub's `app/globals.css` tokens change.
+
 ## 2026-07-02 — Adopt client-side JS as progressive enhancement (relax the no-JS rule)
 
 - **Decision:** The old "no client-side JavaScript" rule is relaxed to **"JS only as progressive enhancement."** The server still renders all content/data (charts stay inline SVG); JS may add client-side sub-tabs and hover tooltips, but every view must remain reachable and readable with JS off (URL-param routing + stacked panels).
