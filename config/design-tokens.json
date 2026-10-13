@@ -36,6 +36,12 @@
       "error":     { "value": "#8B3A3A" }, "errorBg":   { "value": "#F0DADA" },
       "info":      { "value": "#5D6D59" }, "infoBg":    { "value": "#E2E8E1" }
     },
+    "channel": {
+      "airbnb":  { "value": "#C24D72", "usage": "Airbnb reservation bars/pills (PriceLabs Report calendar)" },
+      "vrbo":    { "value": "#2F76BE", "usage": "Vrbo reservation bars/pills" },
+      "bcom":    { "value": "#A56813", "usage": "Booking.com reservation bars/pills" },
+      "other":   { "value": "#74736E", "usage": "Direct / other channel reservation bars/pills" }
+    },
     "dark": {
       "background":    { "value": "#161910" },
       "surface":       { "value": "#1E2A1C" },

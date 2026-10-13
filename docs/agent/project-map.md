@@ -59,7 +59,7 @@ Local smoke test: `http://localhost:3000/api/dashboard/demo?token=demo_revfactor
 ## The route
 
 `app/api/dashboard/[slug]/route.js` — single `GET` handler.
-- Query params: `token` (required, per-client secret), `tab` (`pricing` default | `seo`), `listing` (drill-down: renders the per-listing view — SEO single funnel by `hubListingId`, pricing detail by `listingId`).
+- Query params: `token` (required, per-client secret), `tab` (`pricing` default | `seo`), `listing` (drill-down: renders the per-listing view — SEO single funnel by `hubListingId`, pricing detail by `listingId`; in the PriceLabs Report model it is the serving `listing_key`, e.g. `hostaway|295808`). PriceLabs Report also uses `view` (`calendar`|`insights`|`neighborhood`) and `date` / `res` / `others` (calendar detail opened server-side, the no-JS path).
 - `slug` is a client UUID, a hardcoded demo (`demo`, `demo-blackbird`), or a **managed dashboard slug** from the `dashboards` table (see below).
 - Flow: `validateClient(slug, token)` → pick data source → `getLayout(client.layout).render(...)` (dashboard **model**, see `lib/layouts/`; `?layout=<key>` override works only outside production) → `renderDashboard(client, data, { tab, seo })`.
 - Pricing data source order: demo mock → `getClientReport` (Supabase) → `fetchClientData` (live PriceLabs) → error.
@@ -83,7 +83,10 @@ Internal-only React pages (server components + Server Actions; forms work withou
 | `supabase.js` | service-role Supabase singleton (`getSupabase`) | — |
 | `clients.js` | `getClientById` — demos → client UUID → managed `dashboards` slug | Map, 10 min (managed: 60 s) |
 | `admin.js` | admin data layer: list clients/dashboards, create/update dashboards, variant toggle, token regen, `dashboardUrl` | — |
-| `layouts/` | Dashboard **models**: `index.js` registry (`listLayouts`, `getLayout` → falls back to `standard`), one file per model. `standard.js` wraps `renderDashboard`; `performance-report.js` = single-page report (year/month KPI cards, Airbnb funnel vs similar listings, per-listing table, 3 SVG trend charts + monthly table, day-of-week insights, glossary) | — |
+| `layouts/` | Dashboard **models**: `index.js` registry (`listLayouts`, `getLayout` → falls back to `standard`), one file per model. `standard.js` wraps `renderDashboard`; `pricelabs-report.js` = port of the pricelabs-dashboard client report (overview + per-listing Calendar / Booking insights / Neighborhood, own data source via `load()`); `performance-report.js` = single-page report (year/month KPI cards, Airbnb funnel vs similar listings, per-listing table, 3 SVG trend charts + monthly table, day-of-week insights, glossary) | — |
+| `serving-db.js` / `serving.js` | PriceLabs Report model's data: postgres.js connection to the pricelabs-dashboard DB (`PRICELABS_SERVING_DATABASE_URL`, lazy) + `getServingPortfolio(client)` / `getServingListing(listingKey)` | Map, 30 min |
+| `calendar.js` | shared price calendar (`renderCalendar`, `calendarCss()`, `CALENDAR_JS`) used by `pricelabs-report` and the standard drill-down's **Calendar** sub-view; `calendarCss` is a function because `render.js` imports this module (circular import) | — |
+| `mock-serving.js` | demo data for the PriceLabs Report model (own seeded streams) | — |
 | `day-of-week.js` | `getClientDayOfWeek(client, { year, listingIds })` — paginated reservations, revenue spread per night, bucketed by weekday; availability = listings × weekdays in the year (errors → null) | Map, 30 min |
 | `admin-auth.js` | `/admin` password check + HMAC-signed session cookie (`requireAdmin`) | — |
 | `auth.js` | `validateClient` — UUID + token, `timingSafeEqual` | — |
@@ -92,7 +95,7 @@ Internal-only React pages (server components + Server Actions; forms work withou
 | `seo.js` | `getClientSeo` — Airbnb funnel data from `seo_metrics` view | Map, 30 min |
 | `reservations.js` | `getClientReservations` / `getListingReservations` — last 6 bookings from `pricelabs_reservations_cache` matview, portfolio-wide or per listing (dedupes by `reservation_key`; errors → `[]`) | Map, 30 min |
 | `mock-data.js` | `generateMockData`, `generateMockReportData`, `generateMockSeoData` | — |
-| `render.js` | `renderDashboard(client, data, { tab, seo, listing })`, `renderErrorPage`; pricing + SEO components; per-listing pricing detail (`renderListingDetail` + `ld*` chart builders, 4 sub-views, enhanced by `LISTING_DETAIL_JS`); SEO drill-down links; `c`/`f` token helpers; inline SVG | — |
+| `render.js` | `renderDashboard(client, data, { tab, seo, listing })`, `renderErrorPage`; pricing + SEO components; per-listing pricing detail (`renderListingDetail` + `ld*` chart builders, 4 sub-views + an optional Calendar sub-view from the pricelabs-dashboard DB — `?view=calendar` opens it, shown only when `loadListingCalendar` in the route finds the listing; enhanced by `LISTING_DETAIL_JS`); SEO drill-down links; `c`/`f` token helpers; inline SVG | — |
 
 ## Supabase schema (Hub project `revfactorHub`)
 

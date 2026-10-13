@@ -7,6 +7,9 @@ import { generateMockDayOfWeekBuckets, generateMockReportData, generateMockReser
 import { buildDayOfWeek, getClientDayOfWeek } from '../../../../lib/day-of-week.js';
 import { renderErrorPage } from '../../../../lib/render.js';
 import { getLayout } from '../../../../lib/layouts/index.js';
+import { isServingConfigured } from '../../../../lib/serving-db.js';
+import { getServingListingById } from '../../../../lib/serving.js';
+import { generateMockServingListing, generateMockServingPortfolio } from '../../../../lib/mock-serving.js';
 
 /**
  * GET /api/dashboard/[slug]?token=xxx
@@ -59,6 +62,26 @@ export async function GET(request, { params }) {
   const isMock = !!(auth.client.useMockData && auth.client.demoListings);
 
   try {
+    // Models with their own data source (e.g. pricelabs-report reads the
+    // pricelabs-dashboard database). The model resolves ?listing= etc. itself.
+    if (layout.load) {
+      const loaded = await layout.load({ client: auth.client, dataClient, params: url.searchParams, isMock });
+      if (loaded.error) {
+        return new Response(renderErrorPage(loaded.error.status, loaded.error.message), { status: loaded.error.status, headers: responseHeaders() });
+      }
+      const { data, ...rest } = loaded;
+      const html = render(auth.client, data, {
+        ...rest,
+        listing,
+        view: url.searchParams.get('view'),
+        date: url.searchParams.get('date'),
+        res: url.searchParams.get('res'),
+        others: url.searchParams.get('others'),
+        layoutParam: layoutOverride,
+      });
+      return new Response(html, { status: 200, headers: { ...responseHeaders(), 'Cache-Control': cacheControl } });
+    }
+
     // Single-page models (e.g. performance-report): pricing report + whatever
     // extra datasets the model declares in `needs`, rendered as one page.
     if (layout.singlePage) {
@@ -144,7 +167,13 @@ export async function GET(request, { params }) {
         : await getClientReservations(dataClient);
     }
 
-    const html = render(auth.client, data, { tab: 'pricing', seo: null, listing, reservations });
+    // Drill-down Calendar sub-view: price calendar from the pricelabs-dashboard
+    // DB. Optional — any miss or failure just hides the sub-view.
+    const calendar = listing ? await loadListingCalendar(auth.client, dataClient, listing, url.searchParams) : null;
+
+    const html = render(auth.client, data, {
+      tab: 'pricing', seo: null, listing, reservations, calendar, view: url.searchParams.get('view'),
+    });
     const isEmpty = !data.listings || data.listings.length === 0;
 
     return new Response(html, {
@@ -160,6 +189,23 @@ export async function GET(request, { params }) {
       renderErrorPage(500, 'something went wrong'),
       { status: 500, headers: responseHeaders() }
     );
+  }
+}
+
+async function loadListingCalendar(client, dataClient, listingId, params) {
+  const detail = { date: params.get('date'), res: params.get('res'), others: params.get('others') };
+  if (client.useMockData && client.demoListings) {
+    const demo = client.demoListings.find((l) => String(l.listingId) === String(listingId));
+    if (!demo) return null;
+    return { listing: generateMockServingPortfolio([demo]).listings[0], ld: generateMockServingListing(demo), detail };
+  }
+  if (!isServingConfigured()) return null;
+  try {
+    const found = await getServingListingById(dataClient, listingId);
+    return found ? { ...found, detail } : null;
+  } catch (err) {
+    console.error('Calendar load failed:', err.message);
+    return null;
   }
 }
 

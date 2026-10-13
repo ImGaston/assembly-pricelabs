@@ -15,6 +15,12 @@ Format:
 
 ---
 
+## 2026-10-12 — PriceLabs Report model reads the pricelabs-dashboard DB directly
+
+- **Decision:** The `pricelabs-report` model reads the sibling app's serving database (read-only `dashboard_reader` login, postgres.js) instead of the Hub, so it can show the price calendar, price reasons and neighborhood data the Hub doesn't have. Ported to server-rendered HTML/SVG; calendar details are `<template>`s opened by JS, with `?date=`/`?res=`/`?others=` URLs as the no-JS path.
+- **Why:** Requested port of the per-client pricelabs-dashboard report into the Assembly portal; copying that data into the Hub would duplicate the nightly pipeline.
+- **Trade-offs:** A second DB + server-only secret; figures may differ slightly from the Hub-based models (different pipelines). Calendar pages are ~350 KB raw (~22 KB gzipped) because each open day carries its detail template. Alternatives rejected: Hub-only replica (no calendar/neighborhood); live PriceLabs API (no neighborhood/price reasons, slower).
+
 ## 2026-10-12 — Dashboard models live in code, assignment lives in the DB
 
 - **Decision:** A "model" is a render function in `lib/layouts/` registered by key; `clients.dashboard_layout` / `dashboards.layout` pick one (migration 006). New models are built in code (with Claude in chat) and deployed; `/admin` only assigns them.
