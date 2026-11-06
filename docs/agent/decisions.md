@@ -15,6 +15,11 @@ Format:
 
 ---
 
+## 2026-11-06 — No-data clients get a 200 setup page, not a 500
+- Decision: Every model (standard, performance-report, pricelabs-report, empty mock) renders a branded "we're setting up your properties" page with 200 + `no-store` when there is no data.
+- Why: The Assembly Custom App (via the Hub redirect) shows the dashboard to every client from day one, including brand-new ones with no listings.
+- Trade-off / alternative rejected: A global `Cache-Control: private, no-store` (suggested in the Hub plan) — rejected; only empty responses skip the CDN, populated ones keep `s-maxage=21600` to avoid cold-start cost across all clients.
+
 ## 2026-10-12 — PriceLabs Report model reads the pricelabs-dashboard DB directly
 
 - **Decision:** The `pricelabs-report` model reads the sibling app's serving database (read-only `dashboard_reader` login, postgres.js) instead of the Hub, so it can show the price calendar, price reasons and neighborhood data the Hub doesn't have. Ported to server-rendered HTML/SVG; calendar details are `<template>`s opened by JS, with `?date=`/`?res=`/`?others=` URLs as the no-JS path.
