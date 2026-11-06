@@ -5,7 +5,7 @@ import { getClientSeo } from '../../../../lib/seo.js';
 import { getClientReservations, getListingReservations } from '../../../../lib/reservations.js';
 import { generateMockDayOfWeekBuckets, generateMockReportData, generateMockReservations, generateMockSeoData } from '../../../../lib/mock-data.js';
 import { buildDayOfWeek, getClientDayOfWeek } from '../../../../lib/day-of-week.js';
-import { renderErrorPage } from '../../../../lib/render.js';
+import { renderErrorPage, renderSetupPage } from '../../../../lib/render.js';
 import { getLayout } from '../../../../lib/layouts/index.js';
 import { isServingConfigured } from '../../../../lib/serving-db.js';
 import { getServingListingById } from '../../../../lib/serving.js';
@@ -60,12 +60,20 @@ export async function GET(request, { params }) {
     : 's-maxage=21600, stale-while-revalidate=3600';
 
   const isMock = !!(auth.client.useMockData && auth.client.demoListings);
+  // The SEO tab of the standard model has its own empty state.
+  const isStandardSeo = tab === 'seo' && !layout.load && !layout.singlePage;
 
   try {
+    // A synthetic portfolio with no listings (unlinked managed dashboard).
+    if (isMock && auth.client.demoListings.length === 0 && !isStandardSeo) {
+      return setupResponse(auth.client, layout.key);
+    }
+
     // Models with their own data source (e.g. pricelabs-report reads the
     // pricelabs-dashboard database). The model resolves ?listing= etc. itself.
     if (layout.load) {
       const loaded = await layout.load({ client: auth.client, dataClient, params: url.searchParams, isMock });
+      if (loaded.empty) return setupResponse(auth.client, layout.key);
       if (loaded.error) {
         return new Response(renderErrorPage(loaded.error.status, loaded.error.message), { status: loaded.error.status, headers: responseHeaders() });
       }
@@ -88,9 +96,7 @@ export async function GET(request, { params }) {
       const data = isMock
         ? generateMockReportData(auth.client.demoListings)
         : await getClientReport(dataClient);
-      if (!data) {
-        return new Response(renderErrorPage(500, 'no report data yet'), { status: 500, headers: responseHeaders() });
-      }
+      if (!data) return setupResponse(auth.client, layout.key);
       const [seo, dayOfWeek] = await Promise.all([
         layout.needs?.seo
           ? (isMock ? generateMockSeoData(auth.client.demoListings) : getClientSeo(dataClient).catch((err) => {
@@ -145,12 +151,7 @@ export async function GET(request, { params }) {
         });
       }
 
-      if (!data) {
-        return new Response(
-          renderErrorPage(500, 'no listings configured'),
-          { status: 500, headers: responseHeaders() }
-        );
-      }
+      if (!data || !data.listings?.length) return setupResponse(auth.client, layout.key);
     }
     // Recent reservations — portfolio-wide on the roll-up, filtered to the one
     // listing on the drill-down's Overview. Fetch failures degrade to an empty
@@ -217,6 +218,17 @@ function mockTotals(data) {
     revenue: rows.reduce((s, m) => s + (m.revenue || 0), 0),
     occ: occ.length ? occ.reduce((s, m) => s + m.occ, 0) / occ.length : null,
   };
+}
+
+// New client with no data yet (no listings / no report rows): a branded 200, never
+// a 500 — the Assembly Custom App shows every client the dashboard from day one.
+// no-store so their numbers appear as soon as the first report lands.
+function setupResponse(client, layoutKey) {
+  console.info('dashboard empty state', { clientId: client.id, layout: layoutKey });
+  return new Response(renderSetupPage(client), {
+    status: 200,
+    headers: { ...responseHeaders(), 'Cache-Control': 'no-store' },
+  });
 }
 
 function responseHeaders() {

@@ -47,7 +47,7 @@ How to write code that fits this repo. See also:
 
 - The route validates auth first and returns `renderErrorPage(status, msg)` for `not_found` (404), `unauthorized` (401), `lookup_failed` (503).
 - Wrap data fetch + render in `try/catch`; log with `console.error` and return a 500 error page. Never leak stack traces or keys into the response.
-- Missing/empty data is a normal path (empty state / `no-store`), not an error.
+- Missing/empty data is a normal path (empty state / `no-store`), not an error. A portfolio with **no data at all** (no listings, no report rows, empty serving portfolio, `demo_listings: []`) returns `setupResponse()` in the route → `renderSetupPage(client)`: 200, branded header + tabs, `no-store`. Models with `load()` signal it with `{ empty: true }`. Log only `clientId` + layout.
 
 ## Gotchas
 
