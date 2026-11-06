@@ -125,6 +125,27 @@ export const adminCss = `
   .back { display: inline-block; font-size: 14px; color: var(--muted-foreground); text-decoration: none; margin-bottom: 12px; }
   .back:hover { color: var(--foreground); }
 
+  /* Client filters */
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .filters input[type=search] { flex: 1 1 240px; width: auto; }
+  .filters select { width: auto; min-width: 150px; }
+  .filters .count { font-size: 12px; margin-left: auto; }
+  input[type=search] { height: 36px; padding: 4px 12px; font: inherit; font-size: 14px; color: var(--foreground); background: color-mix(in oklab, var(--input) 50%, transparent); border: 1px solid transparent; border-radius: 1.375rem; }
+  .pill.status-active { background: color-mix(in oklab, var(--primary) 12%, transparent); color: var(--primary); }
+  .pill.status-onboarding { background: color-mix(in oklab, oklch(0.75 0.15 75) 18%, transparent); color: oklch(0.55 0.13 70); }
+  .pill.status-test, .pill.status-none { border-color: var(--border); color: var(--muted-foreground); }
+
+  /* Templates */
+  .tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
+  .tpl-grid .card { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .tpl .card-head { margin: 8px 0 0; }
+  .tpl .actions { margin-top: auto; padding-top: 8px; }
+  .tpl-thumb { display: block; position: relative; height: 200px; overflow: hidden; border-radius: 1rem; background: var(--muted); margin: -8px -8px 0; }
+  .tpl-thumb iframe { position: absolute; top: 0; left: 0; width: 400%; height: 400%; border: 0; transform: scale(0.25); transform-origin: 0 0; pointer-events: none; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tags .pill { text-transform: none; }
+  .tpl-frame { width: 100%; height: 80vh; min-height: 560px; border: 0; border-radius: 1rem; background: var(--muted); }
+
   /* Login: centered card, like the Hub */
   .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
   .login .card { width: 100%; max-width: 384px; margin: 0; }

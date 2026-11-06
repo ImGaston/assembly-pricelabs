@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { requireAdmin } from '../../lib/admin-auth.js';
-import { dashboardUrl, listClients, listDashboards } from '../../lib/admin.js';
+import { dashboardUrl, filterClients, listClients, listDashboards } from '../../lib/admin.js';
 import { getLayout, listLayouts } from '../../lib/layouts/index.js';
 import { changeClientLayout, toggleClientVariant } from './actions.js';
+import ClientFilters from './ClientFilters.js';
 import CopyLink from './CopyLink.js';
 import Shell from './Shell.js';
 
@@ -16,19 +17,31 @@ function dashboardState(d) {
   return <span className={`pill ${d.variant}`}>{d.variant}</span>;
 }
 
-export default async function AdminHome() {
+const one = (v) => (Array.isArray(v) ? v[0] : v) || '';
+
+export default async function AdminHome({ searchParams }) {
   requireAdmin();
-  const [clients, dashboards] = await Promise.all([listClients(), listDashboards()]);
+  const [allClients, dashboards] = await Promise.all([listClients(), listDashboards()]);
   const layouts = listLayouts();
+  const filters = {
+    q: one(searchParams?.q),
+    status: one(searchParams?.status),
+    layout: one(searchParams?.layout),
+    variant: one(searchParams?.variant),
+  };
+  const clients = filterClients(allClients, filters);
+  // Keep the active filters after a Set / Make beta round trip.
+  const backQs = new URLSearchParams(Object.entries(filters).filter(([, v]) => v)).toString();
+  const statuses = [...new Set(allClients.map((cl) => cl.status || 'none'))].sort();
 
   return (
     <Shell>
       <div className="page-head">
         <div>
           <h1>Dashboard Manager</h1>
-          <p className="muted">Create beta dashboards and share links with clients.</p>
+          <p className="muted">Manage client dashboards, models and share links.</p>
         </div>
-        <Link className="btn" href="/admin/dashboards/new">New beta dashboard</Link>
+        <Link className="btn ghost" href="/admin/templates">Templates</Link>
       </div>
 
       <section className="card">
@@ -68,13 +81,17 @@ export default async function AdminHome() {
         )}
       </section>
 
-      <section className="card">
+      <section className="card" id="clients">
         <div className="card-head">
           <div>
             <h2 className="card-title">Client dashboards</h2>
             <p className="card-desc">Changes here apply to the client's existing link and can take up to 6 hours to show (CDN cache). To test with a client, use a beta dashboard link — it updates instantly.</p>
           </div>
         </div>
+        <ClientFilters values={filters} statuses={statuses} layouts={layouts} total={allClients.length} shown={clients.length} />
+        {clients.length === 0 ? (
+          <p className="muted">No clients match these filters.</p>
+        ) : (
         <div className="scroll">
           <table>
             <thead>
@@ -87,9 +104,10 @@ export default async function AdminHome() {
                 return (
                   <tr key={cl.id}>
                     <td><div className="cell-title">{cl.name}</div><div className="cell-sub">{cl.market || ''}</div></td>
-                    <td className="muted">{cl.status || '—'}</td>
+                    <td><span className={`pill status-${cl.status || 'none'}`}>{cl.status || '—'}</span></td>
                     <td>
                       <form className="row-actions" action={changeClientLayout}>
+                        <input type="hidden" name="back" value={backQs} />
                         <input type="hidden" name="client_id" value={cl.id} />
                         <select name="layout" defaultValue={cl.dashboard_layout || 'standard'} aria-label={`Model for ${cl.name}`} style={{ height: 28, minWidth: 120 }}>
                           {layouts.map((l) => <option key={l.key} value={l.key}>{l.name}</option>)}
@@ -103,6 +121,7 @@ export default async function AdminHome() {
                         <form className="inline" action={toggleClientVariant}>
                           <input type="hidden" name="client_id" value={cl.id} />
                           <input type="hidden" name="variant" value={next} />
+                          <input type="hidden" name="back" value={backQs} />
                           <button className="btn ghost xs" type="submit">Make {next}</button>
                         </form>
                       </div>
@@ -114,6 +133,7 @@ export default async function AdminHome() {
             </tbody>
           </table>
         </div>
+        )}
       </section>
     </Shell>
   );

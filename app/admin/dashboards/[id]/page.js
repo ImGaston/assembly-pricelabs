@@ -12,8 +12,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export default async function EditDashboardPage({ params, searchParams }) {
   requireAdmin();
   if (!UUID_RE.test(params.id)) notFound();
-  const [dashboard, clients] = await Promise.all([getDashboard(params.id), listClients()]);
+  const dashboard = await getDashboard(params.id);
   if (!dashboard) notFound();
+  const clients = await listClients({ keepId: dashboard.client_id });
 
   return (
     <Shell crumb={dashboard.name}>

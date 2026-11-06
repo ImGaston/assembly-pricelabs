@@ -39,16 +39,26 @@ export async function signOut() {
   redirect('/admin/login');
 }
 
+// Return path after a client-row action: the admin home with its filters
+// (`back` = query string), or an internal admin page (`back` = /admin/...).
+function backPath(formData) {
+  const back = String(formData.get('back') || '');
+  if (back.startsWith('/admin') && !back.startsWith('//')) return back;
+  const qs = new URLSearchParams(back).toString();
+  return qs ? `/admin?${qs}#clients` : '/admin#clients';
+}
+
 export async function toggleClientVariant(formData) {
   requireAdmin();
   await setClientVariant(String(formData.get('client_id')), String(formData.get('variant')));
-  done('/admin');
+  done(backPath(formData));
 }
 
 export async function changeClientLayout(formData) {
   requireAdmin();
   await setClientLayout(String(formData.get('client_id')), String(formData.get('layout')));
-  done('/admin');
+  revalidatePath('/admin/templates', 'layout');
+  done(backPath(formData));
 }
 
 export async function saveDashboard(formData) {

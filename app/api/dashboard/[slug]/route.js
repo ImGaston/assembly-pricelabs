@@ -6,7 +6,8 @@ import { getClientReservations, getListingReservations } from '../../../../lib/r
 import { generateMockDayOfWeekBuckets, generateMockReportData, generateMockReservations, generateMockSeoData } from '../../../../lib/mock-data.js';
 import { buildDayOfWeek, getClientDayOfWeek } from '../../../../lib/day-of-week.js';
 import { renderErrorPage, renderSetupPage } from '../../../../lib/render.js';
-import { getLayout } from '../../../../lib/layouts/index.js';
+import { getLayout, isLayout } from '../../../../lib/layouts/index.js';
+import { RESERVED_SLUGS } from '../../../../lib/clients.js';
 import { isServingConfigured } from '../../../../lib/serving-db.js';
 import { getServingListingById } from '../../../../lib/serving.js';
 import { generateMockServingListing, generateMockServingPortfolio } from '../../../../lib/mock-serving.js';
@@ -48,9 +49,12 @@ export async function GET(request, { params }) {
   // Linked managed dashboards render under their own slug but read data keyed
   // on the underlying Hub client.
   const dataClient = auth.client.dataClient || auth.client;
-  // Dashboard model. `?layout=` override is dev-only (iterating on a new model
-  // locally); in production the model comes from the client / dashboard row.
-  const layoutOverride = process.env.NODE_ENV !== 'production' ? url.searchParams.get('layout') : null;
+  // Dashboard model. `?layout=` override works in dev (iterating on a new model
+  // locally) and, in production, only on the hardcoded demos (mock data) — that
+  // is what /admin/templates previews. Real clients and managed dashboards
+  // always use the model from their row.
+  const allowOverride = process.env.NODE_ENV !== 'production' || RESERVED_SLUGS.includes(slug);
+  const layoutOverride = allowOverride && isLayout(url.searchParams.get('layout')) ? url.searchParams.get('layout') : null;
   const layoutKey = layoutOverride || auth.client.layout;
   const layout = getLayout(layoutKey);
   const { render } = layout;
