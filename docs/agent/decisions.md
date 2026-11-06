@@ -73,3 +73,9 @@ Format:
 - **Skip edge cache when zero listings.** Return `no-store` for empty dashboards (commit `86cd3a8`).
 - **Report as primary pricing source, live API as fallback.** `getClientReport` (daily Supabase report) is primary; `fetchClientData` (live PriceLabs `/v1/listings`) is the fallback for clients without a report run.
 - **Pricing calendar removed.** The Customer API exposes no per-date pricing, so the per-date calendar was dropped.
+
+## 2026-11-06 — Admin inside Assembly via the Internal-facing URL
+
+- **Decision:** Let Assembly sign internal users into `/admin`: verify the Custom App `?token=` in middleware, then keep a partitioned third-party cookie (`rf_admin_embed`). The password login stays for direct access.
+- **Why:** The team wants the Dashboard Manager inside Assembly without a second password. In a cross-site iframe a `SameSite=Lax` cookie is never sent, so the password session can't work there; `SameSite=None; Partitioned` (CHIPS) is the only cookie that browsers keep in that context.
+- **Trade-off:** Token decryption is reimplemented (~20 lines of Web Crypto) instead of adding `@assembly-js/node-sdk` (TypeScript-only, large codegen). CBC has no MAC, so every new token costs one Assembly API lookup of the internal user (cached 10 min). Browsers that drop partitioned cookies stay signed in only on pages loaded with a fresh `?token=` (the first page); in-app navigation would hit the login page. `/admin` is now framable, but only by the `ADMIN_FRAME_ANCESTORS` allowlist.
