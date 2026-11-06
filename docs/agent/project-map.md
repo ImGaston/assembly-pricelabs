@@ -69,8 +69,9 @@ Local smoke test: `http://localhost:3000/api/dashboard/demo?token=demo_revfactor
 
 ## Admin — Dashboard Manager (`/admin`)
 
-Internal-only React pages (server components + Server Actions; forms work without JS). Not iframe-embedded (`X-Frame-Options: DENY`, `noindex`).
-- `/admin/login` — single shared password (`ADMIN_PASSWORD`) → signed HttpOnly cookie `rf_admin` (7 days, path `/admin`). `noindex` + `X-Frame-Options: DENY` set in `next.config.js`.
+Internal-only React pages (server components + Server Actions; forms work without JS). `noindex`; framable only by Assembly (CSP `frame-ancestors`).
+- **Also opened inside Assembly** as the Custom App's *Internal-facing URL* (`/admin`): `middleware.js` verifies Assembly's `?token=` (`lib/assembly-auth.js`), passes the identity to the render via the `x-rf-assembly-user` request header (stripped from incoming requests) and sets `rf_admin_embed` (signed, 12 h, `SameSite=None; Secure; Partitioned`) so navigation inside the iframe stays signed in. `requireAdmin()` accepts either session; `adminSession()` tells which (Shell shows "… via Assembly" instead of Sign out). `/admin` is framable only by `ADMIN_FRAME_ANCESTORS` (default Assembly domains) — see `next.config.js`.
+- `/admin/login` — single shared password (`ADMIN_PASSWORD`) → signed HttpOnly cookie `rf_admin` (7 days, path `/admin`). `noindex` + CSP `frame-ancestors` set in `next.config.js`.
 - `/admin` — lists managed dashboards + all clients with copyable links; per-client stable/beta toggle.
 - `/admin/dashboards/new`, `/admin/dashboards/[id]` — create/edit a managed dashboard (sample data or linked to a real client), enable/expire, regenerate token.
 - Look: mirrors the RevFactor Hub (shadcn tokens in `app/admin/styles.js`, Geist font, Hub logos in `public/admin/`), not the dashboard brand tokens — see decisions 2026-10-12.
@@ -88,7 +89,9 @@ Internal-only React pages (server components + Server Actions; forms work withou
 | `calendar.js` | shared price calendar (`renderCalendar`, `calendarCss()`, `CALENDAR_JS`) used by `pricelabs-report` and the standard drill-down's **Calendar** sub-view; `calendarCss` is a function because `render.js` imports this module (circular import) | — |
 | `mock-serving.js` | demo data for the PriceLabs Report model (own seeded streams) | — |
 | `day-of-week.js` | `getClientDayOfWeek(client, { year, listingIds })` — paginated reservations, revenue spread per night, bucketed by weekday; availability = listings × weekdays in the year (errors → null) | Map, 30 min |
-| `admin-auth.js` | `/admin` password check + HMAC-signed session cookie (`requireAdmin`) | — |
+| `admin-auth.js` | `/admin` password check + HMAC-signed session cookie; also accepts the Assembly embed session (`requireAdmin`, `adminSession`) | — |
+| `assembly-auth.js` | decrypt Assembly Custom App `?token=` (Web Crypto) + verify the internal user via the Assembly API | Map, 10 min |
+| `admin-embed-session.js` | `rf_admin_embed` cookie constants + Web Crypto signer (used by `middleware.js`) | — |
 | `auth.js` | `validateClient` — UUID + token, `timingSafeEqual` | — |
 | `pricelabs.js` | `fetchClientData` — live PriceLabs `/v1/listings`, filter by group | Map, 6 h |
 | `reports.js` | `getClientReport` — primary pricing source (report_* tables) | Map, 30 min |
