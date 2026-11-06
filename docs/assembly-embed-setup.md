@@ -1,5 +1,12 @@
 # Assembly Portal — Embed Setup Guide
 
+> **Superseded (2026-11-06):** the dashboard is now shown through one Assembly **Custom App**
+> served by the Hub: `https://hub.revfactor.io/portal/dashboard`. It identifies the client from
+> the Assembly session token and redirects to that client's `dashboard_url`, so there is **no
+> per-client setup** anymore. Clients without listings see a "being set up" page. Setup steps:
+> `docs/assembly-dashboard-app.md` in the revfactor-hub repo. The manual flow below is kept only
+> for reference while the old app is retired.
+
 ## How to embed the Pricing Dashboard in Assembly
 
 ### One-time setup
@@ -57,7 +64,7 @@ For each client:
 **Data looks stale?**
 - Cache refreshes every 6 hours
 
-## Future: Custom App SDK (Phase 2)
+## Custom App SDK (Phase 2) — done in the Hub (2026-11-06)
 
 Assembly supports Custom Apps that receive encrypted session tokens identifying the logged-in client. This eliminates the need for manual URL setup per client.
 

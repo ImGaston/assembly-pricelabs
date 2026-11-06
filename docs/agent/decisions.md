@@ -15,6 +15,10 @@ Format:
 
 ---
 
+## 2026-11-06 — No-data clients get a 200 setup page, not a 500
+
+Context: the Hub's single Assembly Custom App shows the dashboard to every client from day one, including clients with no listings. Decision: "no data yet" is a normal state, so render `renderSetupPage` with 200 and `no-store`. `pricelabs-report`'s `load` signals it with `{ empty: true }`. Real failures keep their error codes. Rejected: keeping the 500 and hiding the app until the first listing exists, because it brings back manual per-client steps in Assembly.
+
 ## 2026-10-12 — PriceLabs Report model reads the pricelabs-dashboard DB directly
 
 - **Decision:** The `pricelabs-report` model reads the sibling app's serving database (read-only `dashboard_reader` login, postgres.js) instead of the Hub, so it can show the price calendar, price reasons and neighborhood data the Hub doesn't have. Ported to server-rendered HTML/SVG; calendar details are `<template>`s opened by JS, with `?date=`/`?res=`/`?others=` URLs as the no-JS path.
