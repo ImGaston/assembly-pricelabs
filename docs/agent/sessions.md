@@ -13,12 +13,6 @@ How to maintain:
 
 ---
 
-## 2026-11-06 — Setup page for clients without data (Assembly Custom App rollout)
-
-- Clients with no listings or report data no longer get a 500 ("no listings configured" / "no report data yet"). They get a **200 welcome page** (`renderSetupPage` in `lib/render.js`, `Cache-Control: no-store`) on all three paths: standard, `singlePage`, and `layout.load`. `pricelabs-report` now returns `{ empty: true }`. Real errors are unchanged (401/404/503, and 500 on an exception).
-- Why: the Hub now serves a single Assembly Custom App (`https://hub.revfactor.io/portal/dashboard`) that redirects each client to their own `dashboard_url`, so new clients open the dashboard on day one. Hub doc: `docs/assembly-dashboard-app.md` in revfactor-hub.
-- Verified: `npm run build`. Under `next start`, the demo returns 200, a bad token returns 401, and the demo with the pricelabs-report layout returns 200. Setup page rendered and checked visually. Not yet tested against a real client with no listings.
-
 ## 2026-08-06 — Recent Reservations section (pricing tab)
 
 - **New section after Portfolio Overview**: last 6 confirmed bookings (listing,

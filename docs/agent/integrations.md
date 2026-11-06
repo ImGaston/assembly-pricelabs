@@ -53,7 +53,7 @@ fallback additionally needs `PRICELABS_API_KEY`.
 
 - Consumes the dashboard as an **iframe embed**: `…/api/dashboard/[client-uuid]?token=[dashboard_token]`. The client never sees the raw URL.
 - Enabled by the iframe headers in `vercel.json` + the route. Setup: [`docs/assembly-embed-setup.md`](../assembly-embed-setup.md).
-- **Since 2026-11-06 the client gets here through one Assembly Custom App served by the Hub** (`https://hub.revfactor.io/portal/dashboard`). The Hub validates the Assembly session token and redirects the iframe to the client's own `dashboard_url`, so nobody pastes per-client embeds anymore. The URL/token format must stay stable: `clients.dashboard_url` is a generated column the Hub reads. Clients with no data get the setup page (200), never an error.
+- Future: Assembly Custom App SDK (auto-identify client, drop the URL token).
 
 ## Vercel
 

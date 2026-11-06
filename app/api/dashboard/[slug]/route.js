@@ -5,7 +5,7 @@ import { getClientSeo } from '../../../../lib/seo.js';
 import { getClientReservations, getListingReservations } from '../../../../lib/reservations.js';
 import { generateMockDayOfWeekBuckets, generateMockReportData, generateMockReservations, generateMockSeoData } from '../../../../lib/mock-data.js';
 import { buildDayOfWeek, getClientDayOfWeek } from '../../../../lib/day-of-week.js';
-import { renderErrorPage, renderSetupPage } from '../../../../lib/render.js';
+import { renderErrorPage } from '../../../../lib/render.js';
 import { getLayout } from '../../../../lib/layouts/index.js';
 import { isServingConfigured } from '../../../../lib/serving-db.js';
 import { getServingListingById } from '../../../../lib/serving.js';
@@ -66,7 +66,6 @@ export async function GET(request, { params }) {
     // pricelabs-dashboard database). The model resolves ?listing= etc. itself.
     if (layout.load) {
       const loaded = await layout.load({ client: auth.client, dataClient, params: url.searchParams, isMock });
-      if (loaded.empty) return setupResponse(auth.client);
       if (loaded.error) {
         return new Response(renderErrorPage(loaded.error.status, loaded.error.message), { status: loaded.error.status, headers: responseHeaders() });
       }
@@ -89,7 +88,9 @@ export async function GET(request, { params }) {
       const data = isMock
         ? generateMockReportData(auth.client.demoListings)
         : await getClientReport(dataClient);
-      if (!data) return setupResponse(auth.client);
+      if (!data) {
+        return new Response(renderErrorPage(500, 'no report data yet'), { status: 500, headers: responseHeaders() });
+      }
       const [seo, dayOfWeek] = await Promise.all([
         layout.needs?.seo
           ? (isMock ? generateMockSeoData(auth.client.demoListings) : getClientSeo(dataClient).catch((err) => {
@@ -144,8 +145,12 @@ export async function GET(request, { params }) {
         });
       }
 
-      // New client without listings or report data yet: welcome page, not an error.
-      if (!data) return setupResponse(auth.client);
+      if (!data) {
+        return new Response(
+          renderErrorPage(500, 'no listings configured'),
+          { status: 500, headers: responseHeaders() }
+        );
+      }
     }
     // Recent reservations — portfolio-wide on the roll-up, filtered to the one
     // listing on the drill-down's Overview. Fetch failures degrade to an empty
@@ -212,14 +217,6 @@ function mockTotals(data) {
     revenue: rows.reduce((s, m) => s + (m.revenue || 0), 0),
     occ: occ.length ? occ.reduce((s, m) => s + m.occ, 0) / occ.length : null,
   };
-}
-
-// 200 + no-store so the real dashboard shows up as soon as data exists.
-function setupResponse(client) {
-  return new Response(renderSetupPage(client), {
-    status: 200,
-    headers: { ...responseHeaders(), 'Cache-Control': 'no-store' },
-  });
 }
 
 function responseHeaders() {
